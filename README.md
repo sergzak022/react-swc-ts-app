@@ -86,23 +86,12 @@ Enabling swc/jest
 ```
 
 TODO
-1. [DONE] add unit tests for Users.tsx
-2. Create Projects component that displays projects based on the user selected
-  - Use TDD to develop
-  - Creaet `useProjects` hook
-  - Create container wrapper
-  - Integrate into Jotai componnet
-3. Update Users component to allow selection of a user
-  - Use TDD to develop
-4. Integrate Users and Projects components 
-  - Use TDD to develop
-5. [DONE] Add unit tests for `useUsers` hook
-6. Integrate jotai state
+1. Integrate jotai state
   - observe behaviors
-7. Integrate Rematch state
+2. Integrate Rematch state
   - observe behaviors
-8. Integrate Zustand state
+3. Integrate Zustand state
   - observe behaviors
-9. Integrate MobX state
+4. Integrate MobX state
   - observe behaviors
-10. Integrate e2e framework (https://webdriver.io/)
+5. Integrate e2e framework (https://webdriver.io/)
