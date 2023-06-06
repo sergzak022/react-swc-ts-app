@@ -1,0 +1,420 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should match snapshot 1`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div>
+        <div>
+          <div>
+            Create User
+          </div>
+          <label>
+            <span>
+              Email: 
+            </span>
+            <input
+              data-testid="User-new-email-input"
+              value=""
+            />
+          </label>
+          <label>
+            <span>
+              Name: 
+            </span>
+            <input
+              data-testid="User-new-name-input"
+              value=""
+            />
+          </label>
+          <label>
+            <button
+              data-testid="User-new-btn"
+              disabled=""
+            >
+              Create
+            </button>
+          </label>
+        </div>
+        <ul
+          data-testid="Users-list"
+        >
+          <li
+            data-testid="User"
+          >
+            <div>
+              <span
+                data-testid="User-email"
+              >
+                foo@gmail.com
+              </span>
+               
+               | 
+               
+              <span
+                data-testid="User-name"
+              >
+                foo
+              </span>
+            </div>
+            <div>
+              <label>
+                Chage Email:
+                <input
+                  data-testid="User-email-input"
+                  value="foo@gmail.com"
+                />
+              </label>
+              <label>
+                Chage name:
+                <input
+                  data-testid="User-name-input"
+                  value="foo"
+                />
+              </label>
+              <label>
+                <button
+                  data-testid="User-delete"
+                >
+                  Delete
+                </button>
+                <button
+                  data-testid="User-select"
+                >
+                  Select
+                </button>
+              </label>
+            </div>
+          </li>
+          <li
+            data-testid="User"
+          >
+            <div>
+              <span
+                data-testid="User-email"
+              >
+                bar@gmail.com
+              </span>
+               
+               | 
+               
+              <span
+                data-testid="User-name"
+              >
+                bar
+              </span>
+            </div>
+            <div>
+              <label>
+                Chage Email:
+                <input
+                  data-testid="User-email-input"
+                  value="bar@gmail.com"
+                />
+              </label>
+              <label>
+                Chage name:
+                <input
+                  data-testid="User-name-input"
+                  value="bar"
+                />
+              </label>
+              <label>
+                <button
+                  data-testid="User-delete"
+                >
+                  Delete
+                </button>
+                <button
+                  data-testid="User-select"
+                >
+                  Select
+                </button>
+              </label>
+            </div>
+          </li>
+          <li
+            data-testid="User"
+          >
+            <div>
+              <span
+                data-testid="User-email"
+              >
+                baz@gmail.com
+              </span>
+               
+               | 
+               
+              <span
+                data-testid="User-name"
+              >
+                baz
+              </span>
+            </div>
+            <div>
+              <label>
+                Chage Email:
+                <input
+                  data-testid="User-email-input"
+                  value="baz@gmail.com"
+                />
+              </label>
+              <label>
+                Chage name:
+                <input
+                  data-testid="User-name-input"
+                  value="baz"
+                />
+              </label>
+              <label>
+                <button
+                  data-testid="User-delete"
+                >
+                  Delete
+                </button>
+                <button
+                  data-testid="User-select"
+                >
+                  Select
+                </button>
+              </label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div>
+      <div>
+        <div>
+          Create User
+        </div>
+        <label>
+          <span>
+            Email: 
+          </span>
+          <input
+            data-testid="User-new-email-input"
+            value=""
+          />
+        </label>
+        <label>
+          <span>
+            Name: 
+          </span>
+          <input
+            data-testid="User-new-name-input"
+            value=""
+          />
+        </label>
+        <label>
+          <button
+            data-testid="User-new-btn"
+            disabled=""
+          >
+            Create
+          </button>
+        </label>
+      </div>
+      <ul
+        data-testid="Users-list"
+      >
+        <li
+          data-testid="User"
+        >
+          <div>
+            <span
+              data-testid="User-email"
+            >
+              foo@gmail.com
+            </span>
+             
+             | 
+             
+            <span
+              data-testid="User-name"
+            >
+              foo
+            </span>
+          </div>
+          <div>
+            <label>
+              Chage Email:
+              <input
+                data-testid="User-email-input"
+                value="foo@gmail.com"
+              />
+            </label>
+            <label>
+              Chage name:
+              <input
+                data-testid="User-name-input"
+                value="foo"
+              />
+            </label>
+            <label>
+              <button
+                data-testid="User-delete"
+              >
+                Delete
+              </button>
+              <button
+                data-testid="User-select"
+              >
+                Select
+              </button>
+            </label>
+          </div>
+        </li>
+        <li
+          data-testid="User"
+        >
+          <div>
+            <span
+              data-testid="User-email"
+            >
+              bar@gmail.com
+            </span>
+             
+             | 
+             
+            <span
+              data-testid="User-name"
+            >
+              bar
+            </span>
+          </div>
+          <div>
+            <label>
+              Chage Email:
+              <input
+                data-testid="User-email-input"
+                value="bar@gmail.com"
+              />
+            </label>
+            <label>
+              Chage name:
+              <input
+                data-testid="User-name-input"
+                value="bar"
+              />
+            </label>
+            <label>
+              <button
+                data-testid="User-delete"
+              >
+                Delete
+              </button>
+              <button
+                data-testid="User-select"
+              >
+                Select
+              </button>
+            </label>
+          </div>
+        </li>
+        <li
+          data-testid="User"
+        >
+          <div>
+            <span
+              data-testid="User-email"
+            >
+              baz@gmail.com
+            </span>
+             
+             | 
+             
+            <span
+              data-testid="User-name"
+            >
+              baz
+            </span>
+          </div>
+          <div>
+            <label>
+              Chage Email:
+              <input
+                data-testid="User-email-input"
+                value="baz@gmail.com"
+              />
+            </label>
+            <label>
+              Chage name:
+              <input
+                data-testid="User-name-input"
+                value="baz"
+              />
+            </label>
+            <label>
+              <button
+                data-testid="User-delete"
+              >
+                Delete
+              </button>
+              <button
+                data-testid="User-select"
+              >
+                Select
+              </button>
+            </label>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
