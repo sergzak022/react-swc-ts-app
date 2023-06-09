@@ -26,9 +26,11 @@ export default {
   coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+   coveragePathIgnorePatterns: [
+     "/node_modules/",
+     "/e2e/",
+     "/tests-examples/"
+   ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
@@ -102,7 +104,10 @@ export default {
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
-  // modulePathIgnorePatterns: [],
+  modulePathIgnorePatterns: [
+     "/e2e/",
+     "/tests-examples/"
+  ],
 
   // Activates notifications for test results
   // notify: false,

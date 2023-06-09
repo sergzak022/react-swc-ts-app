@@ -5,8 +5,12 @@ export const handlers = [
   rest.get('api/users', (_req, res, ctx) => {
     return res(ctx.json(data.users.map(data.convertAPIUserToUser)))
   }),
-  rest.post('api/users', (_req, res, ctx) => {
-    const newUser = data.createUser({projectCount: 0})
+  rest.post('api/users', async (req, res, ctx) => {
+    const { email, name } = await req.json()
+    const newUser = data.createUser({
+      projectCount: 0,
+      email, name
+    })
     return res(ctx.json(data.convertAPIUserToUser(newUser)))
   }),
   rest.put('api/users/:userId', async (req, res, ctx) => {

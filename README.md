@@ -84,6 +84,10 @@ Enabling swc/jest
     '@utils/(.*)': '<rootDir>/src/utils/$1',
   },
 ```
+Playwright
+
+1. npx playwright test --ui //run with ui
+2. npx playwright codegen [URL] // run codegen
 
 TODO
 1. Integrate jotai state

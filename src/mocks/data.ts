@@ -5,6 +5,8 @@ import { Project, NewProject, User } from "@components";
 interface CreateUserProps {
   id ?: number;
   projectCount: number;
+  name?: string;
+  email?: string;
 }
 
 interface APIUser extends User {
@@ -36,14 +38,16 @@ export function seedUsers(count: number) {
 }
 
 export function createUser( props : CreateUserProps ) {
-  const { id, projectCount } = props
+  const {
+    id, projectCount, name, email
+  } = props
 
   const newProjects = range(projects.length, projects.length + projectCount).map(getFakeProjects)
 
   const user = {
     id: id != null ? id : users.length,
-    email: faker.internet.email(),
-    name: faker.name.fullName(),
+    email: email || faker.internet.email(),
+    name: name || faker.name.fullName(),
     projects: newProjects
   }
 

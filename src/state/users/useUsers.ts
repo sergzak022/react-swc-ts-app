@@ -48,6 +48,7 @@ export function useUsers( passedUsers: Array<User> = DEFAULT_USERS_LIST ) {
 
     usersAPI.createUser(newUser).then((user) => {
       const newUsers = [...users, user]
+      console.log('foo createUser', newUsers, user)
       setUsers(newUsers)
     }).catch((err) => {
       console.error('Could not create user', newUser, err)
