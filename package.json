@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test": "jest --watchAll"
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "e2e": "npm run build -- -m development && npm run preview -- --port 5173 & BASE_URL=http://localhost:5173 npx playwright test"
   },
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
