@@ -8,12 +8,8 @@ test.beforeEach(async ({page}) => {
   projectsHelper = new Projects(page)
 })
 
-//TODO
-//1. Create project for new user
-//2. Delete project for new user
-
 test('should be able to create a new project', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
   await usersHelper.createUser('foo@gmail.com', 'foo')
   await usersHelper.selectUser('foo@gmail.com')
 
@@ -25,7 +21,7 @@ test('should be able to create a new project', async ({ page }) => {
 });
 
 test('should be able to delete a new project', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
   await usersHelper.createUser('foo@gmail.com', 'foo')
   await usersHelper.selectUser('foo@gmail.com')
 

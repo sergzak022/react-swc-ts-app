@@ -9,12 +9,6 @@ import './index.css'
 import Jotai from './pages/Jotai'
 import TryMSV from './pages/TryMSV'
 
-if (import.meta.env.MODE === 'development') {
-  const { start, populateData } = await import('./mocks/browser')
-  populateData()
-  start()
-}
-
 const router = createBrowserRouter([
   {
     path: "/jotai",
@@ -30,8 +24,24 @@ const router = createBrowserRouter([
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+function runApp() {
+  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>,
+  )
+}
+
+if (import.meta.env.MODE === 'development') {
+  // NOTE: using `then` because top level await is not supported for torgets other than esnext
+  import('./mocks/browser').then(({ start, populateData }) => {
+    populateData()
+    start()
+    runApp()
+
+  })
+} else {
+  runApp()
+}
+
+

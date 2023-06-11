@@ -17,8 +17,12 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: Build project in development mode
+      run: npm run build -- -m development
+    - name: Start file server
+      run: npm run preview -- --port 5173 &
     - name: Run Playwright tests
-      run: npx playwright test
+      run: BASE_URL=http://localhost:5173 npx playwright test
     - uses: actions/upload-artifact@v3
       if: always()
       with:

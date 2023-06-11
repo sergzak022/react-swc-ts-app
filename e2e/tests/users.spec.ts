@@ -7,19 +7,19 @@ test.beforeEach(async ({page}) => {
 })
 
 test('create new button should be disabled if nothin is entered', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
   await expect(await page.getByTestId('User-new-btn')).toBeDisabled()
 });
 
 test('create new button should be disabled if only email entered', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
 
   await usersHelper.fillInNewUserEmail('foo@gmail.com')
   await expect(await page.getByTestId('User-new-btn')).toBeDisabled()
 });
 
 test('create new button should be disabled if only name entered', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
   await usersHelper.fillInNewUserEmail('foo')
   await expect(await page.getByTestId('User-new-btn')).toBeDisabled()
 });
@@ -35,7 +35,7 @@ test('create new button should be enabled if email and name are entered', async 
 });
 
 test('create new user', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
 
   await usersHelper.createUser('foo@gmail.com', 'foo')
 
@@ -46,7 +46,7 @@ test('create new user', async ({ page }) => {
 });
 
 test('delete new user', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
 
   await usersHelper.createUser('foo@gmail.com', 'foo')
 
@@ -61,7 +61,7 @@ test('delete new user', async ({ page }) => {
 });
 
 test('select new user', async ({ page }) => {
-  await page.goto('http://localhost:5173/jotai');
+  await page.goto('/jotai');
 
   await usersHelper.createUser('foo@gmail.com', 'foo')
   await usersHelper.selectUser('foo@gmail.com')
