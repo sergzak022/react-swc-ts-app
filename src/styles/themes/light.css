@@ -1,0 +1,65 @@
+/* Light Theme — Clean wireframe aesthetic with subtle shadows */
+:root {
+  /* Surfaces */
+  --color-bg-app:        var(--paper);         /* White background */
+  --color-bg-surface:    var(--neutral-50);    /* Very light gray for cards */
+  --color-bg-muted:      var(--neutral-100);   /* Light gray for secondary surfaces */
+  --color-bg-hover:      var(--neutral-100);   /* Subtle hover state */
+  --color-bg-active:     var(--neutral-200);   /* Subtle active state */
+
+  /* Typography */
+  --color-fg-primary:    var(--ink);           /* Near-black text */
+  --color-fg-muted:      var(--neutral-600);   /* Medium gray for secondary text */
+  --color-fg-inverse:    var(--paper);         /* White text on dark backgrounds */
+  --color-fg-disabled:   var(--neutral-400);   /* Light gray for disabled text */
+
+  /* Borders */
+  --color-border:        var(--neutral-300);   /* Light gray borders */
+  --color-border-strong: var(--neutral-400);   /* Slightly stronger borders */
+  --color-border-muted:  var(--neutral-200);   /* Very subtle borders */
+
+  /* Brand colors — Dark gray as primary brand for wireframe */
+  --color-brand-primary:   var(--neutral-900); /* Dark gray */
+  --color-brand-secondary: var(--neutral-700); /* Medium-dark gray */
+
+  /* Status colors — Muted hints */
+  --color-success:       var(--success-500);   /* Muted green */
+  --color-warning:       var(--warning-500);   /* Amber */
+  --color-error:         var(--error-500);     /* Red */
+  --color-info:          var(--neutral-500);   /* Medium gray */
+
+  /* Status backgrounds — Very subtle tints */
+  --color-bg-success:    #f0fdf4;              /* Very light green */
+  --color-bg-warning:    #fffbeb;              /* Very light amber */
+  --color-bg-error:      #fef2f2;              /* Very light red */
+  --color-bg-info:       var(--neutral-100);   /* Light gray */
+
+  /* Buttons */
+  --color-bg-button:     var(--neutral-900);   /* Dark gray button */
+  --color-fg-button:     var(--paper);         /* White text */
+  --color-bg-button-hover: var(--neutral-800); /* Slightly lighter on hover */
+  --color-bg-button-secondary: var(--neutral-100); /* Light gray secondary button */
+  --color-fg-button-secondary: var(--neutral-900); /* Dark text */
+
+  /* Inputs */
+  --color-bg-input:      var(--paper);         /* White input background */
+  --color-fg-input:      var(--ink);           /* Dark text */
+  --color-border-input:  var(--neutral-300);   /* Light gray border */
+  --color-border-input-focus: var(--neutral-500); /* Darker on focus */
+
+  /* Layout density */
+  --space-unit:          var(--space-4);       /* 1rem base spacing */
+
+  /* Radii aliases */
+  --radius-card:         var(--radius-lg);     /* 8px for cards */
+  --radius-button:       var(--radius-md);     /* 6px for buttons */
+  --radius-input:        var(--radius-sm);     /* 4px for inputs */
+  --radius-chip:         var(--radius-xl);     /* 12px for chips */
+
+  /* Elevation aliases — Subtle shadows for wireframe */
+  --elevation-card:      var(--shadow-card);     /* Minimal card shadow */
+  --elevation-popover:   var(--shadow-popover);  /* Slight popover shadow */
+  --elevation-dropdown:  var(--shadow-dropdown); /* Medium dropdown shadow */
+  --elevation-modal:     var(--shadow-modal);    /* Prominent modal shadow */
+}
+

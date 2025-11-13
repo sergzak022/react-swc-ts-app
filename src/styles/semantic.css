@@ -1,0 +1,64 @@
+:root {
+  /* Surfaces & content */
+  --color-bg-app:        initial;  /* Root application background */
+  --color-bg-surface:    initial;  /* Card/panel surfaces */
+  --color-bg-muted:      initial;  /* Secondary surfaces */
+  --color-bg-hover:      initial;  /* Hover state backgrounds */
+  --color-bg-active:     initial;  /* Active/pressed state backgrounds */
+
+  /* Typography */
+  --color-fg-primary:    initial;  /* Primary text */
+  --color-fg-muted:      initial;  /* Secondary text */
+  --color-fg-inverse:    initial;  /* Text on inverse surfaces */
+  --color-fg-disabled:   initial;  /* Disabled text */
+
+  /* Borders & outlines */
+  --color-border:        initial;  /* Default borders */
+  --color-border-strong: initial;  /* Emphasized borders */
+  --color-border-muted:  initial;  /* Subtle borders */
+
+  /* Brand colors (primary + secondary for wireframe aesthetic) */
+  --color-brand-primary:   initial;  /* Primary brand color */
+  --color-brand-secondary: initial;  /* Secondary brand color */
+
+  /* Status colors — Muted hints */
+  --color-success:       initial;  /* Success states */
+  --color-warning:       initial;  /* Warning states */
+  --color-error:         initial;  /* Error states */
+  --color-info:          initial;  /* Informational states */
+
+  /* Status backgrounds */
+  --color-bg-success:    initial;  /* Success background */
+  --color-bg-warning:    initial;  /* Warning background */
+  --color-bg-error:      initial;  /* Error background */
+  --color-bg-info:       initial;  /* Info background */
+
+  /* Controls — Buttons */
+  --color-bg-button:     initial;  /* Primary button background */
+  --color-fg-button:     initial;  /* Primary button text */
+  --color-bg-button-hover: initial;  /* Button hover state */
+  --color-bg-button-secondary: initial;  /* Secondary button background */
+  --color-fg-button-secondary: initial;  /* Secondary button text */
+
+  /* Controls — Inputs */
+  --color-bg-input:      initial;  /* Input background */
+  --color-fg-input:      initial;  /* Input text */
+  --color-border-input:  initial;  /* Input border */
+  --color-border-input-focus: initial;  /* Input focus border */
+
+  /* Layout density */
+  --space-unit:          initial;  /* Base spacing unit */
+
+  /* Radii aliases — Intent-based */
+  --radius-card:         initial;  /* Cards and panels */
+  --radius-button:       initial;  /* Buttons */
+  --radius-input:        initial;  /* Input fields */
+  --radius-chip:         initial;  /* Chips and badges */
+
+  /* Elevation aliases — Maps to shadow tokens */
+  --elevation-card:      initial;  /* Card elevation */
+  --elevation-popover:   initial;  /* Popover elevation */
+  --elevation-dropdown:  initial;  /* Dropdown elevation */
+  --elevation-modal:     initial;  /* Modal elevation */
+}
+

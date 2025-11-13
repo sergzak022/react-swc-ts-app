@@ -1,0 +1,46 @@
+:root {
+  /* Brand hierarchy — Grayscale serves as both brand and neutral */
+  --brand-primary-50:  #fafafa;
+  --brand-primary-100: #f5f5f5;
+  --brand-primary-200: #e5e5e5;
+  --brand-primary-300: #d4d4d4;
+  --brand-primary-400: #a3a3a3;
+  --brand-primary-500: #737373;
+  --brand-primary-600: #525252;
+  --brand-primary-700: #404040;
+  --brand-primary-800: #262626;
+  --brand-primary-900: #171717;
+
+  --brand-secondary-50:  #fafafa;
+  --brand-secondary-100: #f5f5f5;
+  --brand-secondary-200: #e5e5e5;
+  --brand-secondary-300: #d4d4d4;
+  --brand-secondary-400: #a3a3a3;
+  --brand-secondary-500: #737373;
+  --brand-secondary-600: #525252;
+  --brand-secondary-700: #404040;
+  --brand-secondary-800: #262626;
+  --brand-secondary-900: #171717;
+
+  /* Neutral scale — Same grayscale palette */
+  --neutral-50:  #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
+
+  /* Status anchors — Muted tones */
+  --success-500: #10b981;  /* Muted green */
+  --warning-500: #f59e0b;  /* Amber */
+  --error-500:   #ef4444;  /* Red */
+
+  /* Base for typography flipping */
+  --ink:   #0a0a0a;  /* Near-black used for text in light mode */
+  --paper: #ffffff;  /* White used for text in dark mode and surfaces in light mode */
+}
+

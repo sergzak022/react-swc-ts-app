@@ -6,8 +6,10 @@ import {
 } from "react-router-dom"
 import App from './App'
 import './index.css'
+import './styles/index.css'
 import Jotai from './pages/Jotai'
 import TryMSV from './pages/TryMSV'
+import ThemePreview from './library/styles/ThemePreview'
 
 const router = createBrowserRouter([
   {
@@ -21,6 +23,14 @@ const router = createBrowserRouter([
   {
     path: "/msv",
     element: <TryMSV />,
+  },
+  {
+    path: "/tasks",
+    element: null,
+  },
+  {
+    path: "/library/styles/preview",
+    element: <ThemePreview />,
   },
 ]);
 

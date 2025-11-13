@@ -1,0 +1,39 @@
+/* Central Style Aggregator — CSS Modules Theme System */
+/* Import order: palettes → tokens → semantic → themes */
+
+@import "./palettes.css";
+@import "./tokens.css";
+@import "./semantic.css";
+@import "./themes/light.css";
+@import "./themes/dark.css";
+
+/* 
+ * Default theme: Light (applied to :root)
+ * Dark theme: Activated by .dark class on :root (document.documentElement)
+ * 
+ * Toggle dark mode:
+ * document.documentElement.classList.toggle('dark', true/false)
+ */
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--line-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-app);
+  color: var(--color-fg-primary);
+  transition: background-color var(--dur-standard) var(--ease-standard),
+              color var(--dur-standard) var(--ease-standard);
+}
+

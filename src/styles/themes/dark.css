@@ -1,0 +1,66 @@
+/* Dark Theme — Sleek, modern dark wireframe aesthetic */
+/* Activated by adding .dark class to :root */
+:root.dark {
+  /* Surfaces — Flip to dark backgrounds */
+  --color-bg-app:        var(--ink);           /* Near-black background */
+  --color-bg-surface:    var(--neutral-800);   /* Dark gray for cards */
+  --color-bg-muted:      var(--neutral-700);   /* Lighter gray for secondary surfaces */
+  --color-bg-hover:      var(--neutral-700);   /* Subtle hover state */
+  --color-bg-active:     var(--neutral-600);   /* Subtle active state */
+
+  /* Typography — Flip to light text */
+  --color-fg-primary:    var(--paper);         /* White text */
+  --color-fg-muted:      var(--neutral-400);   /* Light gray for secondary text */
+  --color-fg-inverse:    var(--ink);           /* Near-black text on light backgrounds */
+  --color-fg-disabled:   var(--neutral-600);   /* Dark gray for disabled text */
+
+  /* Borders — Darker in dark mode */
+  --color-border:        var(--neutral-700);   /* Dark gray borders */
+  --color-border-strong: var(--neutral-600);   /* Slightly lighter borders */
+  --color-border-muted:  var(--neutral-800);   /* Very subtle borders */
+
+  /* Brand colors — Light gray as primary brand for dark wireframe */
+  --color-brand-primary:   var(--neutral-100); /* Light gray */
+  --color-brand-secondary: var(--neutral-300); /* Medium-light gray */
+
+  /* Status colors — Same muted tones work well in dark */
+  --color-success:       var(--success-500);   /* Muted green */
+  --color-warning:       var(--warning-500);   /* Amber */
+  --color-error:         var(--error-500);     /* Red */
+  --color-info:          var(--neutral-400);   /* Light gray */
+
+  /* Status backgrounds — Darker tints for dark mode */
+  --color-bg-success:    #064e3b;              /* Dark green */
+  --color-bg-warning:    #78350f;              /* Dark amber */
+  --color-bg-error:      #7f1d1d;              /* Dark red */
+  --color-bg-info:       var(--neutral-800);   /* Dark gray */
+
+  /* Buttons */
+  --color-bg-button:     var(--neutral-100);   /* Light gray button */
+  --color-fg-button:     var(--ink);           /* Dark text */
+  --color-bg-button-hover: var(--neutral-200); /* Slightly lighter on hover */
+  --color-bg-button-secondary: var(--neutral-800); /* Dark gray secondary button */
+  --color-fg-button-secondary: var(--neutral-100); /* Light text */
+
+  /* Inputs */
+  --color-bg-input:      var(--neutral-800);   /* Dark gray input background */
+  --color-fg-input:      var(--paper);         /* White text */
+  --color-border-input:  var(--neutral-700);   /* Dark border */
+  --color-border-input-focus: var(--neutral-500); /* Lighter on focus */
+
+  /* Layout density */
+  --space-unit:          var(--space-4);       /* 1rem base spacing */
+
+  /* Radii aliases — Same as light */
+  --radius-card:         var(--radius-lg);     /* 8px for cards */
+  --radius-button:       var(--radius-md);     /* 6px for buttons */
+  --radius-input:        var(--radius-sm);     /* 4px for inputs */
+  --radius-chip:         var(--radius-xl);     /* 12px for chips */
+
+  /* Elevation aliases — Adjusted for dark surfaces */
+  --elevation-card:      var(--shadow-card);     /* Minimal card shadow */
+  --elevation-popover:   var(--shadow-popover);  /* Slight popover shadow */
+  --elevation-dropdown:  var(--shadow-dropdown); /* Medium dropdown shadow */
+  --elevation-modal:     var(--shadow-modal);    /* Prominent modal shadow */
+}
+
