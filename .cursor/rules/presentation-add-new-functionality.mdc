@@ -1,0 +1,402 @@
+---
+alwaysApply: false
+---
+
+# Presentation Layer Workflow: New UI Functionality
+
+This workflow defines how to add **brand new UI pieces** to the code base.  
+It strictly covers **leaf components**, optional **layout components**, their **tests**, **fixtures**,  
+**library pages**, and **E2E screenshots**.
+
+It **does not** modify existing components  
+
+---
+
+## 0) Core Philosophy (MUST follow)
+
+### Low Cognitive Load
+Prefer highly specific components over generic abstractions.  
+Avoid “mega components” or prop matrices with many optional flags.
+
+### Two Component Types
+
+#### **Leaf Component**
+A pure, specific UI unit (e.g., `ItemsList`, `NewItemForm`).
+Contains ONLY presentation concerns:
+
+- Typed props (data + callbacks),
+- DOM/JSX structure,
+- Local UI state if needed.
+
+No data fetching. No business logic.
+
+#### **Layout Component**
+A composition layer that combines multiple leafs.  
+Responsible for:
+
+- Structuring multiple leafs,
+- Prop-object forwarding,
+- Pure layout logic.
+
+No transformations, no derived business logic, no modes.
+
+### Prop-object Forwarding (Layout → Leaf)
+
+Layouts receive a single object whose keys map to leafs:
+
+```ts
+{
+  itemsList: ItemsListProps;
+  itemsListFilter: ItemsListFilterProps;
+  newItemForm: NewItemFormProps;
+}
+
+Rules:
+	•	Layouts do not re-express leaf props individually.
+	•	Layouts spread each object directly into the corresponding leaf.
+	•	If a leaf becomes complex → split it, don’t add modes.
+
+⸻
+
+0.1) Terminology
+
+Library Page (in scope)
+
+A dev-only page in src/library/** that mounts one component/layout with deterministic fixtures.
+Used for:
+	•	Manual review,
+	•	E2E tests,
+	•	Stable DOM contract for LLMs.
+
+Application Page (out of scope)
+
+A route-level page in the real app router.
+Never created or modified by this workflow.
+
+⸻
+
+1) Repo Structure, Naming & File Purpose
+
+Folder Structure (by domain/module)
+
+/src/components/
+  items/
+    ItemsList.tsx
+    ItemsList.test.tsx
+    ItemsList.fixture.ts
+    ItemsPageLayout.tsx
+    ItemsPageLayout.test.tsx
+
+/src/library/
+  items/
+    ItemsList.tsx
+    ItemsPageLayout.tsx
+
+/tests/e2e/
+  items/
+    ItemsList.e2e.spec.ts
+    ItemsList/
+      2025-11-05T09-15-20.png
+
+/docs/plans/presentation/<YYYY-MM-DD>/<slug>/
+  plan.md
+  files.md
+  notes.md
+
+File Purpose Catalog
+
+Path Pattern	Purpose	Used By	Checklist
+/src/components/<module>/<Component>.tsx	Leaf component (pure presentation unit).	Layouts, library pages	Typed props; DOM; callbacks.
+/src/components/<module>/<Component>.test.tsx	Unit tests for leaf.	Test runner	100% coverage for touched files; uses fixtures.
+/src/components/<module>/<Component>Utils.ts	Component utilities (fixtures, pure helpers).	Tests, library pages, E2E	Exports minimal() & rich() fixtures.
+/src/components/<module>/<Component>Layout.tsx	Layout that composes leafs.	Library pages	Pure composition; prop-object forwarding only.
+/src/components/<module>/<Component>Layout.test.tsx	Layout tests.	Test runner	Verifies correct prop forwarding.
+/src/library/<module>/<Component>.tsx	Library page (dev-only harness).	Humans, E2E	Mounts component/layout with fixture; deterministic.
+/tests/e2e/<module>/<Component>.e2e.spec.ts	E2E spec.	Playwright	One action + PNG screenshot.
+/docs/plans/.../plan.md	Workflow plan.	Human + agent	Intent, prop contracts, acceptance criteria.
+/docs/plans/.../files.md	File list.	Human + agent	Absolute paths.
+/docs/plans/.../notes.md	Notes.	Human + agent	Constraints, edge cases.
+
+
+⸻
+
+What is a Library Page?
+
+A dev-only page under src/library/<module>/
+that mounts one leaf or layout using deterministic fixture props.
+
+It provides:
+	•	A manual review harness,
+	•	A stable DOM environment for E2E tests,
+	•	A predictable sandbox for LLMs,
+	•	No APIs, no global state, no routing wiring.
+
+⸻
+
+2) Modification Boundaries (IMPORTANT)
+
+Allowed
+	•	Create/modify files ONLY inside:
+	•	src/components/<module>/** (new leafs/layouts),
+	•	src/library/<module>/** (library pages for these components),
+	•	tests/e2e/<module>/** (new E2E specs + screenshots),
+	•	docs/plans/presentation/<date>/<slug>/** (plan/files/notes).
+
+Forbidden
+
+Do NOT:
+	•	Modify existing components (handled by a separate “extend existing UI” workflow).
+	•	Modify:
+	•	src/styles/**
+	•	src/library/styles/**
+	•	src/state/**
+	•	src/services/**
+	•	src/integrations/**
+	•	Add business logic or integration code.
+	•	Add or modify application routes/pages.
+	•	Add global providers.
+	•	Create or modify theme/styling assets.
+
+Violations = errors.
+
+⸻
+
+2.1 Test IDs (REQUIRED)
+
+- All important DOM nodes in new components (roots, key buttons, inputs, rows, etc.)
+  MUST have `data-testid` attributes.
+- `data-testid` values MUST be defined as constants (in a shared place per component/module)
+  and imported by both components and tests.
+- Tests (unit + E2E) SHOULD use these test ID constants as primary selectors
+  to keep tests stable and less fragile than role/text selectors.
+
+⸻
+
+3) Workflow (Stage Order)
+
+PLAN → SCAFFOLD → STRUCTURE → LOGIC → STYLING → UNIT → FIXTURES & UTILS → LIBRARY PAGE → E2E + IMAGE → SUMMARY
+
+Note: STYLING here does not define how styling works — it simply marks the stage at which styling is added via an external styling system.
+
+⸻
+
+3.1 PLAN
+	•	Write or update:
+
+/docs/plans/presentation/<date>/<slug>/{plan.md,files.md}
+
+
+	•	Include:
+	•	Intent and acceptance criteria
+	•	List of leafs being created (+ whether a layout is needed)
+	•	Draft prop contracts (data + callbacks)
+	•	All visual states required
+	•	Interaction scenarios
+
+⸻
+
+3.2 SCAFFOLD
+
+Create empty skeleton files for:
+	•	leafs
+	•	layout (optional)
+	•	utils files (for fixtures/helpers)
+	•	unit tests
+	•	library page(s)
+	•	E2E spec
+
+Update files.md accordingly.
+
+⸻
+
+3.3 STRUCTURE (DOM-first)
+	•	Build minimal, semantic DOM/JSX.
+	•	Add `data-testid` attributes using constants from test ID registry (see 2.1).
+	•	Use semantic HTML and ARIA roles where appropriate.
+
+⸻
+
+3.4 LOGIC (Bind to Structure)
+	•	Finalize prop types (data + callbacks).
+	•	Bind callbacks and local state.
+	•	Keep logic pure and local.
+	•	No fetching, no business logic.
+
+⸻
+
+3.5 STYLING (Conceptual Only)
+	•	Apply styling at this stage using the active styling system defined externally.
+	•	This rules file intentionally does not constrain styling technology.
+
+⸻
+
+3.6 UNIT (100% for touched files)
+	•	Use fixtures from `<ComponentName>Utils.ts` (minimal() and rich()).
+	•	Use test ID constants as primary selectors (see 2.1).
+	•	Test:
+	•	Render states
+	•	Callback correctness
+	•	Minimal vs rich states
+	•	Edge cases
+	•	No network or global state.
+
+⸻
+
+3.7 Fixtures & Utils
+
+- If a component needs fixtures, or has logic that can be a pure testable function,
+  define a `<ComponentName>Utils` file next to the component.
+- Put fixtures (e.g. `minimal()`, `rich()`) and other pure helpers into this utils file.
+- Tests and library pages MUST import fixtures/helpers from the utils file,
+  not re-define them inline.
+
+⸻
+
+3.8 LIBRARY PAGE
+
+Create under:
+
+src/library/<module>/<Component>.tsx
+
+Requirements:
+	•	Mount a single leaf or layout.
+	•	Support:
+	•	?fixture=minimal
+	•	?fixture=rich
+	•	Fully deterministic DOM.
+	•	No global providers unless required for rendering.
+	•	No real API calls.
+
+⸻
+
+3.9 E2E + IMAGE
+
+Create:
+
+/tests/e2e/<module>/<Component>.e2e.spec.ts
+
+The test MUST:
+	•	Visit library page (preferably ?fixture=rich)
+	•	Perform one meaningful interaction
+	•	Save a PNG screenshot to:
+
+/tests/e2e/<module>/<Component>/<ISO_TIMESTAMP>.png
+
+The test must be deterministic and fast.
+
+⸻
+
+3.10 SUMMARY (MUST)
+
+At the end of Phase 2, you MUST update the planning artifacts to reflect reality:
+
+- `plan.md`
+	- Set `Status` → `✅ Complete` (or accurate final status).
+	- Update the Acceptance Criteria checkboxes (`[x]` / `[ ]`) based on what actually shipped.
+	- Append a **"Summary (Phase 2 Complete)"** section containing:
+		- Final prop interfaces (as implemented, not just as initially drafted).
+		- Library page URL(s) for this workflow.
+		- E2E spec path(s) + screenshot directory/filenames.
+		- How to run unit tests and E2E tests from the CLI.
+
+- `files.md`
+	- Ensure the list matches the actual files on disk (add/remove/rename as needed).
+
+- `notes.md`
+	- Append:
+		- **Implementation Notes** — anything important learned while building.
+		- **Deviations from Plan** — where the implementation intentionally diverges from the original plan (and why).
+
+⸻
+
+4) Leaf vs Layout Rules (Quick Ref)
+
+Leaf
+	•	Props contain only what this UI unit needs
+	•	No modes; split the component instead
+	•	No business logic or data access
+
+Layout
+	•	Props shape:
+
+{
+  leafNameCamel: LeafProps;
+}
+
+	•	Pure composition
+	•	No transformations or new logic
+
+⸻
+
+5) Anti-patterns (Guardrails)
+
+Avoid:
+	•	❌ “Mode” props (view="grid|kanban|calendar")
+	•	❌ Generic primitives with many optional props
+	•	❌ Hidden globals
+	•	❌ Large components doing multiple jobs
+
+Prefer:
+	•	✔️ Many small leafs
+	•	✔️ One layout that composes leafs
+	•	✔️ Deterministic fixtures → library page → E2E
+	•	✔️ DOM-first → logic → styling → tests → harness
+
+⸻
+
+6) Output Artifacts (Per Request)
+
+Each workflow run MUST produce:
+	•	New leaf components + unit tests
+	•	Optional layout + unit tests
+	•	Library pages (dev-only)
+	•	E2E specs + timestamped PNGs
+	•	Updated:
+
+docs/plans/presentation/<date>/<slug>/{plan.md,files.md,notes.md}
+
+
+
+⸻
+
+7) Optional Headers (for Clarity)
+
+Component Utils (Fixtures)
+
+/**
+ * Purpose: Deterministic test data and pure helpers for <ComponentName>.
+ * Consumers: unit tests, library page, E2E.
+ */
+import type { <ComponentName>Props } from "./<ComponentName>";
+
+export function minimal(): <ComponentName>Props {
+  return { /* smallest valid props */ };
+}
+
+export function rich(): <ComponentName>Props {
+  return { /* full multi-state props */ };
+}
+
+Library Page
+
+/**
+ * Purpose: Dev-only preview harness for <ComponentName>.
+ * URL: /library/<module>/<ComponentName>?fixture=minimal|rich
+ * Deterministic. No APIs. No global state.
+ */
+import { useMemo } from "react";
+import { <ComponentName> } from "@/src/components/<module>/<ComponentName>";
+import * as fx from "@/src/components/<module>/<ComponentName>Utils";
+
+export default function Page() {
+  const fixtureName =
+    new URLSearchParams(globalThis.location.search).get("fixture") ?? "minimal";
+
+  const props = useMemo(
+    () => (fixtureName === "rich" ? fx.rich() : fx.minimal()),
+    [fixtureName]
+  );
+
+  return <div style={{ padding: 16 }}><ComponentName {...props} /></div>;
+}
+

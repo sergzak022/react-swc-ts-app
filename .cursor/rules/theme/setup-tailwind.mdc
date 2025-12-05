@@ -1,0 +1,971 @@
+---
+description: TailwindCSS Theme System Implementation. Implements the Base Theme System Blueprint (@meta-theme.mdc) using TailwindCSS native mechanisms.
+alwaysApply: false
+---
+
+# TailwindCSS Theme System Implementation
+
+This rules file implements the **Base Theme System Blueprint** (@meta-theme.mdc) for TailwindCSS.
+
+**Contract**: All requirements from the blueprint MUST be satisfied. This file defines only the TailwindCSS-specific implementation details.
+
+---
+
+## 1. Scope
+
+Implements Blueprint Section 1 (Scope) via TailwindCSS mechanisms:
+
+- **Palettes**: Defined as raw color objects in `src/styles/palettes.ts` (TypeScript module).
+- **Primitives (Tokens)**: Extended in `tailwind.config.ts` via `theme.extend`.
+- **Semantic Tokens**: Exposed as CSS custom properties via a Tailwind plugin, defined under `:root` and `.dark` in generated CSS.
+- **Themes**: Light (`:root`) and Dark (`.dark`) using `darkMode: 'class'`.
+- **Theme Preview Page**: React component at `src/library/styles/ThemePreview.tsx`.
+- **Documentation**: Inline JSDoc/comments in all TypeScript and CSS files.
+
+---
+
+## 2. Modification Boundaries
+
+### 2.1 Allowed Write Scope
+
+The agent MAY ONLY create or modify:
+
+1. **Theme Core Assets**:
+   - `src/styles/palettes.ts`
+   - `src/styles/tokens.ts`
+   - `src/styles/semantic.ts`
+   - `src/styles/themes/light.ts`
+   - `src/styles/themes/dark.ts`
+   - `src/styles/index.ts`
+   - `tailwind.config.ts` (theme.extend and plugins only; preserve existing config)
+
+2. **Theme Preview**:
+   - `src/library/styles/ThemePreview.tsx`
+   - Optional routing updates to register the preview page (e.g., add route in dev mode).
+
+3. **Planning Documents**:
+   - `docs/plans/theme/<YYYY-MM-DD>/<theme-name>/plan.md`
+   - `docs/plans/theme/<YYYY-MM-DD>/<theme-name>/files.md`
+   - `docs/plans/theme/<YYYY-MM-DD>/<theme-name>/notes.md`
+
+4. **Root Theme Toggle** (minimal hook):
+   - IF needed, a small utility (e.g., `src/utils/themeToggle.ts`) to toggle `.dark` class on `<html>` or `<body>`.
+   - MAY add one-line import in `src/main.tsx` or `src/App.tsx` ONLY to initialize theme state (e.g., read from localStorage).
+   - NO other changes to `App.tsx` or feature components.
+
+### 2.2 Forbidden Write Scope
+
+The agent MUST NOT:
+
+- Edit any files under `src/components/**` (except for the minimal theme toggle hook mentioned above).
+- Edit any files under `src/pages/**`.
+- Edit any files under `src/state/**`.
+- Edit any business logic or feature code.
+- Add theme logic inside feature components.
+
+**Violation of these boundaries is a critical error.**
+
+---
+
+## 3. Structure & File Locations
+
+Implements Blueprint Section 3 (Structure & Locations).
+
+### 3.1 Theme Core (`src/styles/`)
+
+| File | Purpose | Exports |
+|------|---------|---------|
+| `palettes.ts` | Raw color scales (brand, neutral, status, ink/paper) | TypeScript objects: `brandPalette`, `neutralPalette`, `statusPalette`, `contrastPalette` |
+| `tokens.ts` | Primitives (spacing, radii, typography, z-index, motion, shadows) | TypeScript objects for `tailwind.config.ts` theme.extend |
+| `semantic.ts` | Semantic token definitions and their mappings | TypeScript object describing semantic token structure; consumed by Tailwind plugin |
+| `themes/light.ts` | Light theme mappings (semantic → palette/primitive) | Object mapping semantic token names to values |
+| `themes/dark.ts` | Dark theme mappings (semantic → palette/primitive) | Object mapping semantic token names to values |
+| `index.ts` | Central export; wires everything together | Re-exports all modules; provides `tailwindPlugin` function |
+
+**Integration Point**: `tailwind.config.ts` imports `src/styles/index.ts` and uses:
+- `tokens` in `theme.extend`.
+- `tailwindPlugin` in `plugins` array.
+
+The plugin generates CSS custom properties under `:root` and `.dark` for all semantic tokens.
+
+### 3.2 Theme Preview (`src/library/styles/`)
+
+| File | Purpose |
+|------|---------|
+| `ThemePreview.tsx` | Dev-only React component demonstrating the theme system. Implements Blueprint Section 4. |
+
+### 3.3 Planning & Notes (`docs/plans/theme/`)
+
+Structure per theme or change:
+
+```
+docs/plans/theme/
+  <YYYY-MM-DD>/
+    <theme-name>/
+      plan.md    → Intent, palette decisions, scope
+      files.md   → List of created/modified files
+      notes.md   → Rationale, edge cases, extension hints
+```
+
+---
+
+## 4. TailwindCSS-Specific Implementation Details
+
+### 4.1 Palettes (`src/styles/palettes.ts`)
+
+**Format**:
+
+```typescript
+/**
+ * Raw color palettes.
+ * These are unopinionated base scales. Semantic tokens reference these values.
+ */
+
+export const brandPalette = {
+  primary: {
+    50: '#...',
+    // ... 100-900
+    950: '#...',
+  },
+  secondary: {
+    50: '#...',
+    // ... 100-900
+    950: '#...',
+  },
+  // tertiary only if explicitly needed
+};
+
+export const neutralPalette = {
+  50: '#...',
+  // ... 100-900
+  950: '#...',
+};
+
+export const statusPalette = {
+  success: {
+    50: '#...',
+    // ... 100-900
+    950: '#...',
+  },
+  warning: { /* ... */ },
+  error: { /* ... */ },
+};
+
+export const contrastPalette = {
+  ink: {
+    light: '#...', // dark text for light backgrounds
+    dark: '#...',  // light text for dark backgrounds
+  },
+  paper: {
+    light: '#...', // light background
+    dark: '#...',  // dark background
+  },
+};
+```
+
+**Documentation**:
+- Include JSDoc block explaining purpose.
+- Reference color generation tool if used (e.g., "Generated via <tool>").
+
+### 4.2 Primitives (`src/styles/tokens.ts`)
+
+**Format**:
+
+```typescript
+/**
+ * Design primitives (spacing, radii, typography, motion, shadows, z-index).
+ * Used in tailwind.config.ts theme.extend.
+ */
+
+export const spacing = {
+  xs: '0.25rem',
+  sm: '0.5rem',
+  md: '1rem',
+  lg: '1.5rem',
+  xl: '2rem',
+  // ... additional scale
+};
+
+export const radii = {
+  sm: '0.125rem',
+  md: '0.25rem',
+  lg: '0.5rem',
+  xl: '1rem',
+  full: '9999px',
+};
+
+export const typography = {
+  fontFamily: {
+    sans: ['Inter', 'system-ui', 'sans-serif'],
+    mono: ['Fira Code', 'monospace'],
+  },
+  fontSize: {
+    xs: ['0.75rem', { lineHeight: '1rem' }],
+    sm: ['0.875rem', { lineHeight: '1.25rem' }],
+    base: ['1rem', { lineHeight: '1.5rem' }],
+    // ... additional sizes
+  },
+};
+
+export const motion = {
+  duration: {
+    fast: '150ms',
+    base: '200ms',
+    slow: '300ms',
+  },
+  easing: {
+    ease: 'ease',
+    easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+    easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+  },
+};
+
+export const shadows = {
+  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+};
+
+export const zIndex = {
+  base: 0,
+  dropdown: 1000,
+  sticky: 1100,
+  overlay: 1300,
+  modal: 1400,
+  popover: 1500,
+  tooltip: 1600,
+};
+```
+
+**Documentation**:
+- JSDoc for each export.
+- Explain how to extend in `tailwind.config.ts`.
+
+### 4.3 Semantic Tokens (`src/styles/semantic.ts`)
+
+**Format**:
+
+```typescript
+/**
+ * Semantic token structure.
+ * Maps intent-based names to palette/primitive references.
+ * Consumed by the Tailwind plugin to generate CSS custom properties.
+ */
+
+export const semanticTokens = {
+  // Backgrounds
+  bg: {
+    app: '--bg-app',
+    surface: '--bg-surface',
+    muted: '--bg-muted',
+  },
+  // Foregrounds
+  fg: {
+    primary: '--fg-primary',
+    muted: '--fg-muted',
+    inverse: '--fg-inverse',
+  },
+  // Borders
+  border: {
+    default: '--border-default',
+    strong: '--border-strong',
+  },
+  // Brand
+  brand: {
+    primary: '--brand-primary',
+    secondary: '--brand-secondary',
+    // tertiary only if needed
+  },
+  // Status
+  status: {
+    success: '--status-success',
+    warning: '--status-warning',
+    error: '--status-error',
+  },
+  // Controls
+  control: {
+    button: {
+      bg: '--control-button-bg',
+      fg: '--control-button-fg',
+    },
+    input: {
+      bg: '--control-input-bg',
+      fg: '--control-input-fg',
+      border: '--control-input-border',
+    },
+  },
+  // Layout
+  layout: {
+    spacing: '--layout-spacing', // base unit
+  },
+  // Radii aliases
+  radius: {
+    card: '--radius-card',
+    chip: '--radius-chip',
+    control: '--radius-control',
+  },
+  // Elevation aliases
+  elevation: {
+    card: '--elevation-card',
+    popover: '--elevation-popover',
+    modal: '--elevation-modal',
+  },
+};
+```
+
+**Documentation**:
+- JSDoc explaining that these are consumed by themes.
+- Note that the plugin will generate Tailwind utilities like `bg-[var(--bg-app)]` or custom utilities.
+
+### 4.4 Themes (`src/styles/themes/light.ts`, `dark.ts`)
+
+**Format** (Light):
+
+```typescript
+/**
+ * Light theme mappings.
+ * Maps each semantic token to a palette/primitive value.
+ */
+
+import { brandPalette, neutralPalette, statusPalette, contrastPalette } from '../palettes';
+import { radii, shadows } from '../tokens';
+
+export const lightTheme = {
+  '--bg-app': contrastPalette.paper.light,
+  '--bg-surface': neutralPalette[50],
+  '--bg-muted': neutralPalette[100],
+
+  '--fg-primary': contrastPalette.ink.light,
+  '--fg-muted': neutralPalette[600],
+  '--fg-inverse': contrastPalette.ink.dark,
+
+  '--border-default': neutralPalette[300],
+  '--border-strong': neutralPalette[400],
+
+  '--brand-primary': brandPalette.primary[600],
+  '--brand-secondary': brandPalette.secondary[600],
+
+  '--status-success': statusPalette.success[600],
+  '--status-warning': statusPalette.warning[600],
+  '--status-error': statusPalette.error[600],
+
+  '--control-button-bg': brandPalette.primary[600],
+  '--control-button-fg': '#fff',
+  '--control-input-bg': '#fff',
+  '--control-input-fg': contrastPalette.ink.light,
+  '--control-input-border': neutralPalette[300],
+
+  '--layout-spacing': '1rem',
+
+  '--radius-card': radii.lg,
+  '--radius-chip': radii.full,
+  '--radius-control': radii.md,
+
+  '--elevation-card': shadows.md,
+  '--elevation-popover': shadows.lg,
+  '--elevation-modal': shadows.xl,
+};
+```
+
+**Format** (Dark):
+
+```typescript
+/**
+ * Dark theme mappings.
+ * Properly adapts contrast, elevation, and brand/status for dark mode.
+ */
+
+import { brandPalette, neutralPalette, statusPalette, contrastPalette } from '../palettes';
+import { radii, shadows } from '../tokens';
+
+export const darkTheme = {
+  '--bg-app': contrastPalette.paper.dark,
+  '--bg-surface': neutralPalette[900],
+  '--bg-muted': neutralPalette[800],
+
+  '--fg-primary': contrastPalette.ink.dark,
+  '--fg-muted': neutralPalette[400],
+  '--fg-inverse': contrastPalette.ink.light,
+
+  '--border-default': neutralPalette[700],
+  '--border-strong': neutralPalette[600],
+
+  '--brand-primary': brandPalette.primary[400],
+  '--brand-secondary': brandPalette.secondary[400],
+
+  '--status-success': statusPalette.success[400],
+  '--status-warning': statusPalette.warning[400],
+  '--status-error': statusPalette.error[400],
+
+  '--control-button-bg': brandPalette.primary[500],
+  '--control-button-fg': '#000',
+  '--control-input-bg': neutralPalette[900],
+  '--control-input-fg': contrastPalette.ink.dark,
+  '--control-input-border': neutralPalette[700],
+
+  '--layout-spacing': '1rem',
+
+  '--radius-card': radii.lg,
+  '--radius-chip': radii.full,
+  '--radius-control': radii.md,
+
+  // Dark mode shadows need higher opacity or adjusted colors
+  '--elevation-card': '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+  '--elevation-popover': '0 10px 15px -3px rgba(0, 0, 0, 0.4)',
+  '--elevation-modal': '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+};
+```
+
+**Documentation**:
+- JSDoc explaining the theme layer.
+- Note adjustments for dark mode (contrast, elevation).
+
+### 4.5 Index & Plugin (`src/styles/index.ts`)
+
+**Format**:
+
+```typescript
+/**
+ * Theme system entry point.
+ * Exports all theme assets and provides the Tailwind plugin.
+ */
+
+import plugin from 'tailwindcss/plugin';
+import { lightTheme } from './themes/light';
+import { darkTheme } from './themes/dark';
+
+export * from './palettes';
+export * from './tokens';
+export * from './semantic';
+export { lightTheme, darkTheme };
+
+/**
+ * Tailwind plugin that injects CSS custom properties for semantic tokens.
+ * Adds utilities for using semantic tokens (e.g., bg-app, text-primary, etc.).
+ */
+export const tailwindPlugin = plugin(
+  function ({ addBase, addUtilities }) {
+    // Inject :root (light) and .dark variables
+    addBase({
+      ':root': lightTheme,
+      '.dark': darkTheme,
+    });
+
+    // Add utilities for semantic tokens
+    addUtilities({
+      '.bg-app': { backgroundColor: 'var(--bg-app)' },
+      '.bg-surface': { backgroundColor: 'var(--bg-surface)' },
+      '.bg-muted': { backgroundColor: 'var(--bg-muted)' },
+
+      '.text-primary': { color: 'var(--fg-primary)' },
+      '.text-muted': { color: 'var(--fg-muted)' },
+      '.text-inverse': { color: 'var(--fg-inverse)' },
+
+      '.border-default': { borderColor: 'var(--border-default)' },
+      '.border-strong': { borderColor: 'var(--border-strong)' },
+
+      '.bg-brand-primary': { backgroundColor: 'var(--brand-primary)' },
+      '.bg-brand-secondary': { backgroundColor: 'var(--brand-secondary)' },
+      '.text-brand-primary': { color: 'var(--brand-primary)' },
+      '.text-brand-secondary': { color: 'var(--brand-secondary)' },
+
+      '.bg-success': { backgroundColor: 'var(--status-success)' },
+      '.bg-warning': { backgroundColor: 'var(--status-warning)' },
+      '.bg-error': { backgroundColor: 'var(--status-error)' },
+      '.text-success': { color: 'var(--status-success)' },
+      '.text-warning': { color: 'var(--status-warning)' },
+      '.text-error': { color: 'var(--status-error)' },
+
+      '.shadow-card': { boxShadow: 'var(--elevation-card)' },
+      '.shadow-popover': { boxShadow: 'var(--elevation-popover)' },
+      '.shadow-modal': { boxShadow: 'var(--elevation-modal)' },
+
+      '.rounded-card': { borderRadius: 'var(--radius-card)' },
+      '.rounded-chip': { borderRadius: 'var(--radius-chip)' },
+      '.rounded-control': { borderRadius: 'var(--radius-control)' },
+    });
+  },
+  {
+    // Extend theme if needed (e.g., for arbitrary value support)
+    theme: {
+      extend: {
+        colors: {
+          semantic: {
+            app: 'var(--bg-app)',
+            surface: 'var(--bg-surface)',
+            muted: 'var(--bg-muted)',
+            // Add more if needed for intellisense
+          },
+        },
+      },
+    },
+  }
+);
+```
+
+**Documentation**:
+- JSDoc for `tailwindPlugin`.
+- Explain that utilities can be extended as needed.
+
+### 4.6 Tailwind Config (`tailwind.config.ts`)
+
+**Integration**:
+
+```typescript
+import type { Config } from 'tailwindcss';
+import { spacing, radii, typography, zIndex, tailwindPlugin } from './src/styles';
+
+export default {
+  darkMode: 'class', // Enable class-based dark mode
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      spacing,
+      borderRadius: radii,
+      ...typography,
+      zIndex,
+    },
+  },
+  plugins: [tailwindPlugin],
+} satisfies Config;
+```
+
+**Documentation**:
+- Comment explaining the plugin integration.
+- Note that primitives are in `theme.extend`.
+
+---
+
+## 5. Theme Preview Page (`src/library/styles/ThemePreview.tsx`)
+
+Implements Blueprint Section 4 (Theme Preview Page Requirements).
+
+**Requirements** (from Blueprint Section 4):
+
+1. **Dev-only**, not part of end-user navigation.
+2. Uses `.dark` class on a wrapper or root element to toggle themes.
+3. Showcases:
+   - **4.1 Theme Toggle**: Button to toggle `.dark` class.
+   - **4.2 Surfaces & Text**: Tiles for `bg-app`, `bg-surface`, `bg-muted`, `text-primary`, `text-muted`, `text-inverse`.
+   - **4.3 Brand & Status**: Swatches for brand primary/secondary, status success/warning/error.
+   - **4.4 Controls**: Small form with text input, textarea, select, checkbox, radio, buttons (primary + neutral).
+   - **4.5 Layout & Spacing**: Responsive multi-column layout (1 col on mobile, 2-3 on desktop). Demonstrate spacing and radii.
+   - **4.6 Elevation & Shadows**: Tiles for `shadow-card`, `shadow-popover`, `shadow-modal`.
+   - **4.7 Documentation**: Inline labels showing which token each visual uses.
+
+**Implementation Template**:
+
+```tsx
+/**
+ * Theme Preview (Dev-Only)
+ * Demonstrates the TailwindCSS theme system.
+ * Implements Blueprint Section 4 (Theme Preview Page Requirements).
+ */
+
+import { useState } from 'react';
+
+export default function ThemePreview() {
+  const [isDark, setIsDark] = useState(false);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
+
+  return (
+    <div className={isDark ? 'dark' : ''}>
+      <div className="min-h-screen bg-app text-primary p-8">
+        <header className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Theme Preview (Dev)</h1>
+          <button
+            onClick={toggleTheme}
+            className="px-4 py-2 bg-brand-primary text-white rounded-control shadow-card"
+          >
+            Toggle {isDark ? 'Light' : 'Dark'}
+          </button>
+        </header>
+
+        {/* 4.2 Surfaces & Text */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Surfaces & Text</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-app p-4 rounded-card shadow-card">
+              <strong>bg-app</strong>
+              <p className="text-primary">text-primary</p>
+              <p className="text-muted">text-muted</p>
+            </div>
+            <div className="bg-surface p-4 rounded-card shadow-card">
+              <strong>bg-surface</strong>
+              <p className="text-primary">text-primary</p>
+            </div>
+            <div className="bg-muted p-4 rounded-card shadow-card">
+              <strong>bg-muted</strong>
+              <p className="text-primary">text-primary</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4.3 Brand & Status */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Brand & Status</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="bg-brand-primary text-white p-4 rounded-card text-center">
+              Brand Primary
+            </div>
+            <div className="bg-brand-secondary text-white p-4 rounded-card text-center">
+              Brand Secondary
+            </div>
+            <div className="bg-success text-white p-4 rounded-card text-center">
+              Success
+            </div>
+            <div className="bg-warning text-white p-4 rounded-card text-center">
+              Warning
+            </div>
+            <div className="bg-error text-white p-4 rounded-card text-center">
+              Error
+            </div>
+          </div>
+        </section>
+
+        {/* 4.4 Controls */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Controls</h2>
+          <form className="bg-surface p-6 rounded-card shadow-card max-w-2xl">
+            <div className="mb-4">
+              <label className="block text-primary mb-2">Text Input</label>
+              <input
+                type="text"
+                placeholder="Enter text"
+                className="w-full px-3 py-2 border border-default rounded-control bg-[var(--control-input-bg)] text-[var(--control-input-fg)]"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-primary mb-2">Textarea</label>
+              <textarea
+                placeholder="Enter text"
+                className="w-full px-3 py-2 border border-default rounded-control bg-[var(--control-input-bg)] text-[var(--control-input-fg)]"
+                rows={3}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-primary mb-2">Select</label>
+              <select className="w-full px-3 py-2 border border-default rounded-control bg-[var(--control-input-bg)] text-[var(--control-input-fg)]">
+                <option>Option 1</option>
+                <option>Option 2</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center text-primary">
+                <input type="checkbox" className="mr-2" />
+                Checkbox
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center text-primary">
+                <input type="radio" name="radio" className="mr-2" />
+                Radio Option 1
+              </label>
+              <label className="flex items-center text-primary mt-2">
+                <input type="radio" name="radio" className="mr-2" />
+                Radio Option 2
+              </label>
+            </div>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className="px-4 py-2 bg-[var(--control-button-bg)] text-[var(--control-button-fg)] rounded-control shadow-card"
+              >
+                Primary Button
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 bg-surface border border-default text-primary rounded-control"
+              >
+                Neutral Button
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* 4.6 Elevation & Shadows */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Elevation & Shadows</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-surface p-6 rounded-card shadow-card">
+              <strong>shadow-card</strong>
+              <p className="text-muted">Card elevation</p>
+            </div>
+            <div className="bg-surface p-6 rounded-card shadow-popover">
+              <strong>shadow-popover</strong>
+              <p className="text-muted">Popover elevation</p>
+            </div>
+            <div className="bg-surface p-6 rounded-card shadow-modal">
+              <strong>shadow-modal</strong>
+              <p className="text-muted">Modal elevation</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4.5 Layout & Spacing (Radii) */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Radii</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-surface p-4 rounded-card shadow-card">
+              <strong>rounded-card</strong>
+            </div>
+            <div className="bg-surface p-4 rounded-chip shadow-card">
+              <strong>rounded-chip</strong>
+            </div>
+            <div className="bg-surface p-4 rounded-control shadow-card">
+              <strong>rounded-control</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+```
+
+**Documentation**:
+- JSDoc block at top referencing Blueprint Section 4.
+- Inline comments noting which tokens are demonstrated.
+
+---
+
+## 6. Workflow
+
+Implements Blueprint Section 6 (Workflow Expectations).
+
+When invoked to set up or modify the TailwindCSS theme system, the agent MUST follow these steps in order:
+
+### Step 1: Plan
+
+Create or update planning documents under `docs/plans/theme/<YYYY-MM-DD>/<theme-name>/`:
+
+1. **`plan.md`**:
+   - Theme name/goal.
+   - Palette decisions (brand colors, neutral scale, status colors).
+   - Scope of changes (new theme, update existing, etc.).
+   - Any constraints or requirements.
+
+2. Confirm whether this is:
+   - A new theme setup (scaffold everything).
+   - An update to an existing theme (modify specific files).
+
+### Step 2: Scaffold
+
+Ensure the required directory structure exists:
+
+```
+src/styles/
+  palettes.ts
+  tokens.ts
+  semantic.ts
+  themes/
+    light.ts
+    dark.ts
+  index.ts
+
+src/library/styles/
+  ThemePreview.tsx
+
+docs/plans/theme/
+  <YYYY-MM-DD>/
+    <theme-name>/
+      plan.md
+      files.md
+      notes.md
+```
+
+Create any missing directories or files.
+
+### Step 3: Implement Tokens
+
+1. **Palettes** (`src/styles/palettes.ts`):
+   - Define `brandPalette`, `neutralPalette`, `statusPalette`, `contrastPalette`.
+   - Include JSDoc documentation.
+
+2. **Primitives** (`src/styles/tokens.ts`):
+   - Define `spacing`, `radii`, `typography`, `motion`, `shadows`, `zIndex`.
+   - Include JSDoc documentation.
+
+3. **Semantic Tokens** (`src/styles/semantic.ts`):
+   - Define `semanticTokens` structure.
+   - Include JSDoc documentation.
+
+### Step 4: Implement Themes
+
+1. **Light Theme** (`src/styles/themes/light.ts`):
+   - Map all semantic tokens to palette/primitive values.
+   - Include JSDoc documentation.
+
+2. **Dark Theme** (`src/styles/themes/dark.ts`):
+   - Map all semantic tokens with proper dark mode adaptations (contrast, elevation).
+   - Include JSDoc documentation.
+
+### Step 5: Implement Plugin & Config
+
+1. **Index** (`src/styles/index.ts`):
+   - Export all modules.
+   - Implement `tailwindPlugin` (as shown in Section 4.5).
+   - Include JSDoc documentation.
+
+2. **Tailwind Config** (`tailwind.config.ts`):
+   - Import primitives and plugin from `src/styles`.
+   - Add primitives to `theme.extend`.
+   - Add plugin to `plugins` array.
+   - Set `darkMode: 'class'`.
+   - Preserve any existing config (content paths, other plugins).
+
+### Step 6: Implement Theme Preview
+
+Create `src/library/styles/ThemePreview.tsx` according to Section 5 and Blueprint Section 4.
+
+**Requirements**:
+- Implement all subsections (4.1–4.7).
+- Use responsive multi-column layout.
+- Include inline labels for all tokens.
+
+### Step 7: Document
+
+Ensure all files have:
+- JSDoc blocks explaining purpose.
+- Inline comments for complex logic.
+- References to Blueprint where applicable.
+
+### Step 8: Summarize
+
+Update planning documents:
+
+1. **`files.md`**:
+   - List all created/modified files.
+   - Note any files that were skipped or deferred.
+
+2. **`notes.md`**:
+   - Document decisions (e.g., why certain palette shades were chosen).
+   - Note edge cases (e.g., dark mode shadow adjustments).
+   - Provide hints for future extensions (e.g., adding tertiary brand color).
+   - Explain how another LLM can consume these assets:
+     - Point to `ThemePreview.tsx` as the visual reference.
+     - Point to `src/styles/index.ts` for utility class names.
+     - Explain semantic token naming conventions.
+
+### Step 9: (Optional) Theme Toggle Utility
+
+If the project doesn't already have a theme toggle mechanism:
+
+1. Create `src/utils/themeToggle.ts`:
+
+```typescript
+/**
+ * Utility to toggle dark mode by adding/removing .dark class on <html>.
+ * Persists preference to localStorage.
+ */
+
+export function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
+}
+
+export function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+```
+
+2. Import and call `initTheme()` in `src/main.tsx`:
+
+```typescript
+import { initTheme } from './utils/themeToggle';
+
+initTheme();
+```
+
+**Boundary**: This is the ONLY modification allowed in `main.tsx` or `App.tsx`.
+
+---
+
+## 7. Consuming the Theme System
+
+### 7.1 For LLMs Styling Components
+
+To style a component using this theme system:
+
+1. **Read** `src/library/styles/ThemePreview.tsx` to see visual examples.
+2. **Read** `src/styles/index.ts` to see available utility classes.
+3. **Use** the utility classes in your component:
+   - Backgrounds: `bg-app`, `bg-surface`, `bg-muted`
+   - Text: `text-primary`, `text-muted`, `text-inverse`
+   - Brand: `bg-brand-primary`, `text-brand-primary`
+   - Status: `bg-success`, `text-error`
+   - Borders: `border-default`, `border-strong`
+   - Shadows: `shadow-card`, `shadow-popover`, `shadow-modal`
+   - Radii: `rounded-card`, `rounded-chip`, `rounded-control`
+4. **Use** primitives from `tailwind.config.ts`:
+   - Spacing: `p-4`, `m-2`, `gap-4`
+   - Custom spacing: `p-[var(--layout-spacing)]`
+   - Typography: `text-base`, `font-sans`
+   - Z-index: `z-[1000]` (from `zIndex.dropdown`)
+
+### 7.2 For Humans
+
+Run the dev server and navigate to the Theme Preview route (to be configured).
+
+---
+
+## 8. Validation
+
+After implementing the theme system, the agent SHOULD:
+
+1. Verify all files exist and match the structure in Section 3.
+2. Verify `tailwind.config.ts` correctly imports and uses the theme system.
+3. Verify `ThemePreview.tsx` renders without errors and demonstrates all required sections (4.1–4.7).
+4. Verify `files.md` lists all created/modified files.
+5. Verify `notes.md` contains guidance for future LLMs/developers.
+
+---
+
+## 9. Extension & Maintenance
+
+### 9.1 Adding a New Semantic Token
+
+1. Update `src/styles/semantic.ts` with the new token name.
+2. Update `src/styles/themes/light.ts` and `dark.ts` with mappings.
+3. Update `src/styles/index.ts` plugin to add a new utility class.
+4. Update `ThemePreview.tsx` to demonstrate the new token.
+5. Update `notes.md` documenting the addition.
+
+### 9.2 Adding a Third Theme (e.g., High Contrast)
+
+1. Create `src/styles/themes/high-contrast.ts`.
+2. Update `src/styles/index.ts` to export the new theme and add it to the plugin.
+3. Update `tailwind.config.ts` if needed (e.g., new class like `.high-contrast`).
+4. Update `ThemePreview.tsx` to support toggling to the new theme.
+5. Document in `notes.md`.
+
+### 9.3 Updating Palettes
+
+1. Update `src/styles/palettes.ts`.
+2. Verify theme files (`light.ts`, `dark.ts`) still reference valid palette shades.
+3. Check `ThemePreview.tsx` visually for any contrast issues.
+4. Document changes in `notes.md`.
+
+---
+
+## 10. Compliance with Blueprint
+
+This rules file implements the Base Theme System Blueprint (@meta-theme.mdc) as follows:
+
+| Blueprint Section | Implementation |
+|-------------------|----------------|
+| 1. Scope | Section 1 (maps all required concepts to TailwindCSS mechanisms) |
+| 2. Modification Boundaries | Section 2 (exact paths and forbidden scopes) |
+| 3. Structure & Locations | Section 3 (concrete files and extensions) |
+| 4. Theme Preview Page Requirements | Section 5 (template implementation) |
+| 5. Documentation Requirements | Sections 4, 7, 8 (inline docs, LLM-friendly naming, consumption guide) |
+| 6. Workflow Expectations | Section 6 (9-step deterministic workflow) |
+
+**Verification**: Any future changes to this rules file MUST remain compliant with the blueprint.

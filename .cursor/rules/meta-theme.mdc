@@ -1,0 +1,237 @@
+---
+description: Base Theme System Blueprint (meta-theme). This file defines the conceptual contract for all theme systems in this codebase. Technology-specific rules files (Tailwind, CSS Modules, CSS-in-JS, etc.) MUST implement these concepts.
+alwaysApply: false
+---
+
+# Base Theme System Blueprint
+
+This blueprint describes **what a theme system is** in this project, independent of styling technology.
+
+Any technology-specific theme rules file MUST:
+
+- Implement these concepts using its own mechanisms.
+- Generate assets in the expected locations.
+- Define a clear workflow for how an agent should create and maintain those assets.
+- Thoroughly document outputs so another LLM can reliably style components using them.
+
+No styling framework details belong here. This is the meta contract.
+
+---
+
+## 1. Scope
+
+A concrete theme system (derived from this blueprint) is responsible for:
+
+1. **Palettes**
+   - Raw, unopinionated color scales:
+     - Brand (primary, secondary; optional tertiary when explicitly needed).
+     - Neutral grayscale.
+     - Status (success, warning, error).
+     - Base values for typography contrast (e.g. "ink" and "paper").
+2. **Primitives (Tokens)**
+   - Technology-agnostic design primitives:
+     - Spacing scale.
+     - Border radii scale.
+     - Typography (font families, sizes, line-heights).
+     - Z-index.
+     - Motion (durations, easings).
+     - Shadows / elevation.
+3. **Semantic Tokens**
+   - Intent-based names that map to palettes/primitives:
+     - Backgrounds: app, surface, muted.
+     - Foregrounds: primary, muted, inverse.
+     - Borders: default, strong.
+     - Brand: primary, secondary (tertiary only if required).
+     - Status: success, warning, error.
+     - Controls: button background/foreground, input background/foreground.
+     - Layout density: base spacing unit.
+     - Radii aliases: card, chip, control.
+     - Elevation aliases: card, popover, modal (and similar).
+4. **Themes**
+   - At minimum: **Light** and **Dark** theme layers.
+   - Each theme provides a complete mapping for all semantic tokens.
+   - Dark theme must properly adapt contrast, elevation, and brand/status behavior (not a naive invert).
+5. **Theme Preview Page**
+   - A dev-only page that visually demonstrates the theme:
+     - Used for manual validation and as context for other LLMs.
+6. **Documentation**
+   - Clear, in-file explanations of what each token group and file is for.
+   - Enough detail that another LLM (or human) can safely apply tokens to components.
+
+Out of scope for this blueprint:
+
+- Applying styles directly to product components.
+- Technology-specific syntax or file extensions.
+
+---
+
+## 2. Modification Boundaries (Conceptual)
+
+Any theme rules file generated from this blueprint MUST:
+
+- Restrict its write-scope to:
+  - Theme configuration assets (in a dedicated `styles`-like area).
+  - Theme preview resources (in a dedicated `library`-like area).
+  - Optional planning/notes documents.
+- EXPLICITLY FORBID:
+  - Editing feature components under application modules (e.g. `src/components/**`),  
+    except for a minimal hook to toggle theme (like attaching/removing a theme class or attribute at the root).
+  - Mixing theme setup with feature logic or business logic.
+
+This blueprint defines **what** must be protected; each concrete rules file must define **exact paths** for its tech.
+
+---
+
+## 3. Structure & Locations (Abstract)
+
+Technology-specific rules MUST define concrete files in these conceptual locations:
+
+1. **Theme Core**
+   - Directory: `src/styles/`
+   - Files (technology-specific extensions/types):
+     - `palettes`      → defines raw color scales and base contrast colors.
+     - `tokens`        → defines spacing, radii, typography, motion, z-index, shadows.
+     - `semantic`      → defines semantic token names and intended roles.
+     - `themes/`       → contains theme-layer definitions (e.g. `light`, `dark`, etc.).
+     - `index`         → central entry point that wires palettes → tokens → semantics → themes.
+2. **Theme Preview**
+   - Directory: `src/library/styles/`
+   - File: `ThemePreview` (technology-specific file type)
+3. **Planning & Notes**
+   - Directory: `docs/plans/theme/`
+   - Files per theme or change:
+     - `plan`   → intent, decisions, constraints.
+     - `files`  → list of created/updated paths.
+     - `notes`  → rationale, edge cases, extension hints.
+
+Concrete rules files must:
+- Choose actual filenames and extensions.
+- Keep this structure recognizable so future tools/LLMs know where to look.
+
+---
+
+## 4. Theme Preview Page Requirements
+
+Any concrete Theme Preview page generated from this blueprint MUST:
+
+1. Be **dev-only**, not part of end-user navigation.
+2. Use the active theme system (light/dark, etc.) exactly as defined by that tech’s theme rules.
+3. Showcase at least the following:
+
+### 4.1 Theme Toggle
+
+- A clear way to switch between **Light** and **Dark**.
+- Uses the same mechanism defined by the theme system (e.g., root class, data-attribute).
+- No external data, no API calls.
+
+### 4.2 Surfaces & Text
+
+- Blocks demonstrating:
+  - App background, surface background, muted background.
+  - Primary text, muted text, inverse text.
+- Each labeled with which semantic token(s) it is using.
+
+### 4.3 Brand & Status
+
+- Swatches or tiles for:
+  - Brand primary (and secondary, if defined).
+  - Status: success, warning, error.
+- Must look good in both themes.
+
+### 4.4 Controls
+
+- A **small form** example with multiple input types:
+  - Text input, textarea, select, checkbox, radio, button(s).
+  - Arranged across **multiple rows**.
+  - Styled via the theme tokens for inputs, labels, borders, focus, and buttons.
+- At least one primary button and one neutral or secondary button.
+
+### 4.5 Layout & Spacing
+
+- The preview layout must:
+  - Use available horizontal space efficiently (no cramped single narrow column on wide screens).
+  - Grow vertically as needed.
+  - Prefer a **responsive multi-column layout**:
+    - On narrow screens: stack sections (1 column).
+    - On wider screens: increase columns (e.g., 2–3 columns) to show more tokens side-by-side.
+- Demonstrate the base spacing unit and radius aliases via cards/tiles.
+
+### 4.6 Elevation & Shadows
+
+- Tiles showing different elevation aliases:
+  - Card
+  - Popover
+  - Modal (or similar)
+- Each tile labeled with the alias it represents.
+
+### 4.7 Documentation in the Preview
+
+- The preview page must inline brief labels or notes so another LLM can:
+  - Parse which visual corresponds to which token.
+  - Reuse that mapping when styling real components.
+
+---
+
+## 5. Documentation Requirements (for Concrete Theme Assets)
+
+Any theme system generated from this blueprint MUST:
+
+1. **Document inline**
+   - Each token group (palettes, tokens, semantic, themes) should include short comments or doc blocks:
+     - What this file defines.
+     - How it should be used.
+     - Example usages or references to the Theme Preview.
+2. **Be LLM-friendly**
+   - Avoid ambiguous naming.
+   - Use consistent, descriptive identifiers.
+   - Make relationships obvious:
+     - e.g. semantic → palette, elevation alias → shadow token.
+3. **Support Chaining**
+   - Assets must be clear enough that another LLM, given:
+     - the theme rules file,
+     - the theme assets,
+     - and the Theme Preview,
+   - can correctly:
+     - pick appropriate tokens,
+     - style or refactor components,
+     - without guessing.
+
+---
+
+## 6. Workflow Expectations (for Technology-Specific Rules Files)
+
+Every tech-specific theme rules file derived from this blueprint MUST define an explicit workflow for the agent, including:
+
+1. **Plan**
+   - Write or update a `plan` document:
+     - Theme name / goal.
+     - Palette and token decisions.
+     - Scope of changes.
+2. **Scaffold**
+   - Create or confirm the required structure under:
+     - `src/styles/`
+     - `src/library/styles/`
+     - `docs/plans/theme/`
+3. **Implement Tokens**
+   - Define palettes, primitives, and semantic tokens using the tech’s standard patterns.
+4. **Implement Themes**
+   - Implement light/dark (and others, if needed) with complete semantic coverage.
+5. **Implement Theme Preview**
+   - Create the Theme Preview page according to Section 4.
+6. **Document**
+   - Ensure all files contain clear comments/docstrings explaining their purpose and usage.
+7. **Summarize**
+   - Update `files` and `notes` documents with:
+     - Which assets were created/modified.
+     - How other LLMs/devs should consume them.
+
+The workflow must be:
+
+- **Deterministic** (same inputs → same structure).
+- **Discoverable** (another LLM can read the rules file and follow the steps).
+- **Strict about scope** (no surprise edits to app components).
+
+---
+
+This blueprint is the single source of truth for theme systems in this project.  
+All future theme-related rules files MUST implement and not contradict these concepts.
