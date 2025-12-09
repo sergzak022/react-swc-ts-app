@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { SelectionPayload, HighlightRect } from './types';
+import type { SelectionPayload, HighlightRect, ComponentContext } from './types';
 import { FloatingButton } from './components/FloatingButton';
 import { Panel } from './components/Panel';
 import { HighlightBox } from './components/HighlightBox';
 import { PickerLayer } from './components/PickerLayer';
+import { resolveSelection } from './api';
 
 const EXCLUDE_IDS = [
   'ui-agent-root',
@@ -22,6 +23,7 @@ export function UiAgentOverlay() {
   const [isInSelectState, setIsInSelectState] = useState(false);
   const [payload, setPayload] = useState<SelectionPayload | null>(null);
   const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(null);
+  const [componentContext, setComponentContext] = useState<ComponentContext | null>(null);
 
   const handleTogglePanel = useCallback(() => {
     if (isPanelOpen) {
@@ -42,6 +44,7 @@ export function UiAgentOverlay() {
     setIsInSelectState(false);
     setPayload(null);
     setHighlightRect(null);
+    setComponentContext(null);
   }, []);
 
   const handleHover = useCallback((rect: HighlightRect | null) => {
@@ -50,7 +53,18 @@ export function UiAgentOverlay() {
 
   const handleSelect = useCallback((selectedPayload: SelectionPayload) => {
     setPayload(selectedPayload);
+    setComponentContext(null); // Clear previous context
     console.log('[UI-Agent] Element selected:', selectedPayload);
+
+    // Request component context from backend
+    resolveSelection(selectedPayload)
+      .then((ctx) => {
+        setComponentContext(ctx);
+        console.log('[UI-Agent] Component context resolved:', ctx);
+      })
+      .catch((err) => {
+        console.error('[UI-Agent] Failed to resolve selection:', err);
+      });
   }, []);
 
   return (
@@ -71,6 +85,7 @@ export function UiAgentOverlay() {
       {isPanelOpen && (
         <Panel
           payload={payload}
+          componentContext={componentContext}
           onClose={handleClosePanel}
         />
       )}

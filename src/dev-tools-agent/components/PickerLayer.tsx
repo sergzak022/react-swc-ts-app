@@ -1,8 +1,33 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
-import type { SelectionPayload, HighlightRect } from '../types';
+import type { SelectionPayload, HighlightRect, TestIdInfo } from '../types';
 import { deepElementFromPoint } from '../utils/deepElementFromPoint';
 import { buildSelector } from '../utils/buildSelector';
 import { throttle } from '../utils/throttle';
+
+/**
+ * Find data-testid on element or nearest ancestor.
+ * Returns structured info about where it was found.
+ */
+function findTestIdInfo(element: Element): TestIdInfo | null {
+  let current: Element | null = element;
+  let depth = 0;
+
+  while (current) {
+    const testId = current.getAttribute('data-testid');
+    if (testId) {
+      return {
+        value: testId,
+        onSelf: depth === 0,
+        depth,
+        ancestorTagName: current.tagName.toLowerCase(),
+      };
+    }
+    current = current.parentElement;
+    depth++;
+  }
+
+  return null;
+}
 
 interface PickerLayerProps {
   onHover: (rect: HighlightRect | null) => void;
@@ -52,10 +77,12 @@ export function PickerLayer({ onHover, onSelect, excludeIds }: PickerLayerProps)
    */
   const buildPayload = useCallback((element: Element): SelectionPayload => {
     const selector = buildSelector(element);
+    const testId = findTestIdInfo(element);
 
     return {
       pageUrl: window.location.href,
       selector,
+      testId,
       domOuterHtml: element.outerHTML.slice(0, 1000),
       textSnippet: (element.textContent || '').trim().slice(0, 100),
       classes: Array.from(element.classList),

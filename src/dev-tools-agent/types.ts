@@ -2,14 +2,10 @@
  * UI-Agent type definitions for element selection and payloads.
  */
 
-export interface SelectionPayload {
-  pageUrl: string;
-  selector: string; // CSS selector string (e.g., '[data-testid="X"]', 'h1.class1.class2', '#id')
-  domOuterHtml: string;
-  textSnippet: string;
-  classes: string[];
-}
+// Re-export shared types
+export type { SelectionPayload, ComponentContext, TestIdInfo } from '../shared/types';
 
+// Overlay-specific types (stay here)
 export interface HighlightRect {
   top: number;
   left: number;
@@ -24,3 +20,5 @@ export interface OverlayState {
   highlightRect: HighlightRect | null;
 }
 
+// Import for use in OverlayState
+import type { SelectionPayload } from '../shared/types';
