@@ -9,6 +9,7 @@ export interface ResolutionResult {
   filePath: string;
   lineNumber?: number;
   codeSnippet?: CodeSnippet;
+  source?: 'heuristic' | 'agent';
 }
 
 /**
@@ -17,6 +18,8 @@ export interface ResolutionResult {
 export interface ResolverOptions {
   /** Working directory to search in */
   cwd: string;
+  /** Whether to use agent fallback when heuristics fail. Default: false */
+  useAgentFallback?: boolean;
 }
 
 /**

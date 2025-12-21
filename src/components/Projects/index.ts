@@ -1,1 +1,6 @@
 export * from './Projects'
+export { type Project as ProjectItem, type NewProjectData } from './types'
+export * from './ProjectsFilter'
+export * from './NewProjectForm'
+export * from './ProjectsList'
+export * from './ProjectsPageLayout'

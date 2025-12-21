@@ -15,6 +15,7 @@ app.get('/health', (_req, res) => {
 
 app.post('/resolve-selection', async (req, res) => {
   const payload: Partial<SelectionPayload> = req.body ?? {};
+  const useAgentFallback = req.body.useAgentFallback ?? false;
 
   // Build base response
   const componentContext: ComponentContext = {
@@ -32,8 +33,10 @@ app.post('/resolve-selection', async (req, res) => {
   try {
     const result = await resolveSelection(payload as SelectionPayload, {
       cwd: process.cwd(),
+      useAgentFallback,
     });
 
+    componentContext.source = result.source || 'heuristic';
     componentContext.confidence = result.confidence;
     componentContext.verified = result.verified;
     componentContext.filePath = result.filePath;

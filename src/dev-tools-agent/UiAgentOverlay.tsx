@@ -5,6 +5,7 @@ import { Panel } from './components/Panel';
 import { HighlightBox } from './components/HighlightBox';
 import { PickerLayer } from './components/PickerLayer';
 import { resolveSelection } from './api';
+import { useAgentFallbackFromStorage } from './test-cases/AgentFallbackContext';
 
 const EXCLUDE_IDS = [
   'ui-agent-root',
@@ -24,6 +25,9 @@ export function UiAgentOverlay() {
   const [payload, setPayload] = useState<SelectionPayload | null>(null);
   const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(null);
   const [componentContext, setComponentContext] = useState<ComponentContext | null>(null);
+  
+  // Read agent fallback state from localStorage
+  const useAgentFallback = useAgentFallbackFromStorage();
 
   const handleTogglePanel = useCallback(() => {
     if (isPanelOpen) {
@@ -57,7 +61,8 @@ export function UiAgentOverlay() {
     console.log('[UI-Agent] Element selected:', selectedPayload);
 
     // Request component context from backend
-    resolveSelection(selectedPayload)
+    // Pass useAgentFallback as third parameter
+    resolveSelection(selectedPayload, undefined, useAgentFallback)
       .then((ctx) => {
         setComponentContext(ctx);
         console.log('[UI-Agent] Component context resolved:', ctx);
@@ -65,7 +70,7 @@ export function UiAgentOverlay() {
       .catch((err) => {
         console.error('[UI-Agent] Failed to resolve selection:', err);
       });
-  }, []);
+  }, [useAgentFallback]);
 
   return (
     <div id="ui-agent-root">

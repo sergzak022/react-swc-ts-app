@@ -372,3 +372,120 @@ Display source code around the matched line in the Panel for visual verification
    - Matched line highlighted in yellow
    - Line numbers on the left
    - Selection Payload collapsed by default (click to expand)
+
+---
+
+## Milestone 5 — Cursor Cheap Model Fallback
+
+**Status:** Complete
+
+### Goal
+
+Use AI when heuristics fail to resolve component location.
+
+### Implementation Notes
+
+**Architecture:**
+- Cursor CLI resolver runs as final fallback in resolver chain
+- Only invoked when heuristic resolvers return low confidence or no result
+- Uses Cursor CLI with auto model for intelligent model selection
+- Validates file existence before returning result
+- Secure implementation using `spawn` (no shell injection vulnerabilities)
+
+**Flow:**
+1. Heuristic resolvers (testId, etc.) run first
+2. If high/medium confidence → return immediately
+3. If low confidence or no result → invoke Cursor CLI resolver
+4. Cursor CLI receives prompt with selection context (selector, text, classes, HTML)
+5. Cursor analyzes codebase and returns JSON with filePath, componentName, lineNumber
+6. Response validated (file must exist in project)
+7. Returns ComponentContext with `source: 'cursor-cli'`
+
+**Files Created:**
+- `server/resolvers/cursorCliResolver.ts` - Cursor CLI integration with secure spawn execution
+
+**Files Modified:**
+- `server/resolvers/types.ts` - Added `source` field to `ResolutionResult`
+- `server/resolvers/testIdResolver.ts` - Exported `extractCodeSnippet`, added `source: 'heuristic'` to all results
+- `server/resolvers/index.ts` - Added Cursor CLI fallback logic in resolver chain
+- `server/index.ts` - Set `source` from resolver result in response
+
+**Dependencies:**
+- Requires Cursor CLI to be installed: `curl https://cursor.com/install -fsS | bash`
+- Requires authentication: `cursor-agent login`
+- Uses auto model selection: `--model auto`
+
+**CLI Command:**
+```bash
+cursor-agent -p --output-format json --model auto "prompt"
+```
+
+**Security:**
+- Uses `spawn` instead of `exec` to prevent command injection
+- No shell escaping needed - arguments passed directly
+- Timeout protection (15 seconds)
+- Graceful error handling
+
+### How to Test
+
+**Prerequisites:**
+1. Install Cursor CLI: `curl https://cursor.com/install -fsS | bash`
+2. Authenticate: `cursor-agent login`
+3. Verify: `cursor-agent --version`
+
+**Backend Testing:**
+
+1. Start backend: `npm run dev:server`
+2. Test with element without `data-testid` (triggers Cursor CLI fallback):
+
+```bash
+curl -X POST http://localhost:4000/resolve-selection \
+  -H "Content-Type: application/json" \
+  -d '{
+    "testId": null,
+    "selector": "button.primary-button",
+    "textSnippet": "Click me",
+    "classes": ["primary-button", "large"],
+    "domOuterHtml": "<button class=\"primary-button large\">Click me</button>",
+    "pageUrl": "http://localhost:5173"
+  }'
+```
+
+Expected:
+- Console shows: `[ui-agent] Heuristics failed or low confidence, trying Cursor CLI...`
+- Console shows: `[ui-agent] Cursor CLI resolved: src/...`
+- Response has `source: "cursor-cli"`
+- Response has `confidence: "medium"` or `"low"`
+- Response has `verified: false`
+
+**Browser Flow:**
+
+1. Start backend: `npm run dev:server`
+2. Start frontend: `npm start`
+3. Click floating button (🎯) to open overlay
+4. Click element **without** `data-testid` (e.g., plain div, heading, text)
+5. Panel shows:
+   - `source`: "cursor-cli" (instead of "heuristic")
+   - `filePath`: actual source file from Cursor CLI
+   - `lineNumber`: line number if Cursor found it
+   - `confidence`: "medium" or "low"
+   - `verified`: "no" (always needs verification for AI results)
+   - Code snippet section (if lineNumber present)
+6. Console logs show Cursor CLI being invoked
+7. Verify file path exists and is reasonable
+
+**Testing Edge Cases:**
+
+1. **No Cursor CLI installed**: Should gracefully fall back to low confidence heuristic result
+2. **Not authenticated**: Should log error and return null
+3. **Timeout**: Should abort after 15 seconds and return null
+4. **Invalid file path**: Should reject and return null
+5. **Malformed JSON**: Should attempt to extract JSON from response
+
+### Notes
+
+- Cursor CLI calls count toward your monthly usage limit
+- Auto model selection chooses optimal model based on task complexity
+- First request may be slower due to CLI startup
+- Subsequent requests benefit from warm CLI process
+- Fallback only triggers when heuristics fail - won't waste API calls on successful heuristic matches

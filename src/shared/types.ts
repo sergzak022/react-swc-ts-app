@@ -55,7 +55,7 @@ export interface SelectionPayload {
 
 export interface ComponentContext {
   id: string;
-  source: 'heuristic' | 'cursor-cli';
+  source: 'heuristic' | 'agent';
   confidence: 'high' | 'medium' | 'low';
   filePath: string;
   componentName?: string;
