@@ -32,9 +32,12 @@ export function EdgeCases() {
     }
   }, []);
   
+  // Get infrastructure test case separately
+  const infrastructureTestCase = testCases.find(tc => tc.id === 'infrastructure-01');
+  
   return (
     <div className="test-category">
-      <h2 className="text-2xl font-bold mb-4">Edge Cases (12 cases)</h2>
+      <h2 className="text-2xl font-bold mb-4">Edge Cases ({testCases.length} cases)</h2>
       <div className="space-y-4">
         {/* edge-01: SVG element */}
         <TestCaseViewer testCase={testCases[0]}>
@@ -127,10 +130,22 @@ export function EdgeCases() {
         
         {/* edge-12: Hidden element */}
         <TestCaseViewer testCase={testCases[11]}>
-          <div className="hidden" style={{ display: 'none' }}>
+          <div className="hidden" style={{ display: 'none' }} data-test-case-id={testCases[11].id}>
             Hidden Element
           </div>
         </TestCaseViewer>
+        
+        {/* infrastructure-01: Test infrastructure exclusion */}
+        {infrastructureTestCase && (
+          <TestCaseViewer testCase={infrastructureTestCase}>
+            <button 
+              data-testid="test-button"
+              data-test-case-id="infrastructure-01"
+            >
+              Test Button
+            </button>
+          </TestCaseViewer>
+        )}
       </div>
     </div>
   );

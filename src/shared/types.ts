@@ -69,3 +69,21 @@ export interface ComponentContext {
   codeSnippet?: CodeSnippet;
 }
 
+/**
+ * Request to submit a verified context to Cursor agent for code modification.
+ */
+export interface SubmissionRequest {
+  componentContext: ComponentContext;
+  userMessage: string;
+}
+
+/**
+ * Response from Cursor agent submission.
+ */
+export interface SubmissionResponse {
+  success: boolean;
+  message: string;
+  /** Agent's response/output if available */
+  agentOutput?: string;
+}
+

@@ -489,3 +489,176 @@ Expected:
 - First request may be slower due to CLI startup
 - Subsequent requests benefit from warm CLI process
 - Fallback only triggers when heuristics fail - won't waste API calls on successful heuristic matches
+
+---
+
+## Milestone 7 — Final AI Submission
+
+**Status:** Complete
+
+### Goal
+
+Enable users to submit verified component contexts to Cursor agent for direct code modifications.
+
+### Implementation Notes
+
+**Architecture:**
+- Users must manually verify component mapping before submission
+- Structured prompt includes file path, line number, code snippet, and user message
+- Uses Cursor agent CLI in normal mode (not preview) to apply changes directly
+- Full round-trip: select element → resolve → verify → describe change → submit
+
+**Flow:**
+1. User clicks element in picker
+2. Backend resolves component location (heuristic or AI fallback)
+3. User reviews context in panel (file, line, code snippet)
+4. User clicks "Verify This Mapping" button
+5. User enters natural language message describing desired change
+6. User clicks "Submit to Cursor Agent"
+7. Backend builds structured prompt with all context
+8. Cursor agent CLI modifies code directly
+9. Panel shows success/failure status with agent output
+
+**Files Created:**
+- `server/resolvers/agentSubmitter.ts` - Agent submission logic with prompt building
+
+**Files Modified:**
+- `src/shared/types.ts` - Added `SubmissionRequest`, `SubmissionResponse` interfaces
+- `src/dev-tools-agent/types.ts` - Re-exported new types from shared/types
+- `src/dev-tools-agent/api.ts` - Added `submitToAgent()` function
+- `src/dev-tools-agent/components/Panel.tsx` - Added verify button, message input, submit button, result display
+- `server/index.ts` - Added `/submit-to-agent` endpoint
+
+**Security:**
+- Only verified contexts can be submitted
+- Uses `spawn` for secure CLI execution
+- 120 second timeout for code modifications
+- Graceful error handling with detailed logging
+
+**Prompt Structure:**
+```
+# Component Context
+File: src/components/Example.tsx
+Component: Example
+Line: 42
+
+# Current Code
+(21 lines of code with match highlighted)
+
+# DOM Context
+Selector: [data-testid="example"]
+Element: Example text content
+
+# Request
+(User's natural language message)
+
+# Instructions
+Please modify the code according to the request above...
+```
+
+### How to Test
+
+**Prerequisites:**
+1. Backend running: `npm run dev:server`
+2. Frontend running: `npm start`
+3. Cursor CLI installed and authenticated
+
+**End-to-End Flow:**
+
+1. Click floating button (🎯) to open overlay
+2. Click any element on the page
+3. Wait for component context to resolve
+4. Review the displayed information:
+   - File path
+   - Line number
+   - Code snippet
+   - Confidence badge
+5. Click "✓ Verify This Mapping" button
+6. Enter a change request, e.g., "Change the button text to 'Click Here'"
+7. Click "🚀 Submit to Cursor Agent"
+8. Watch for submission status:
+   - Spinner during submission
+   - Success message if applied
+   - Error message if failed
+9. Check your editor - code should be modified
+10. Review agent output in expandable section if available
+
+**Test Cases:**
+
+1. **Verified high-confidence match:**
+   - Pick element with `data-testid`
+   - Should auto-resolve with high confidence
+   - Verify and submit message
+   - Should succeed
+
+2. **Verified low-confidence match:**
+   - Pick element without `data-testid`
+   - Falls back to Cursor CLI resolver
+   - Verify and submit message
+   - Should succeed but may need more context
+
+3. **Without verification:**
+   - Pick element
+   - Try to submit without clicking verify
+   - Submit button should be hidden
+   - Verify button should be shown with warning
+
+4. **Empty message:**
+   - Verify a context
+   - Leave message empty
+   - Submit button should be disabled
+
+5. **Long-running submission:**
+   - Submit complex request
+   - Should timeout after 120 seconds if cursor-agent hangs
+   - Should show error message
+
+**Backend Testing (curl):**
+
+```bash
+# Should fail - not verified
+curl -X POST http://localhost:4000/submit-to-agent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "componentContext": {
+      "id": "test",
+      "source": "heuristic",
+      "confidence": "high",
+      "filePath": "src/App.tsx",
+      "lineNumber": 10,
+      "verified": false,
+      "selectorSummary": "button",
+      "domSummary": "Click me",
+      "needsVerification": true
+    },
+    "userMessage": "Change button text"
+  }'
+
+# Should succeed - verified
+curl -X POST http://localhost:4000/submit-to-agent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "componentContext": {
+      "id": "test",
+      "source": "heuristic",
+      "confidence": "high",
+      "filePath": "src/App.tsx",
+      "lineNumber": 10,
+      "verified": true,
+      "selectorSummary": "button",
+      "domSummary": "Click me",
+      "needsVerification": false
+    },
+    "userMessage": "Change button text to \"Submit\""
+  }'
+```
+
+### Notes
+
+- Cursor agent modifies code directly - no preview mode
+- Each submission counts toward Cursor API usage
+- Large changes may take longer (up to 120s timeout)
+- Agent output is captured and displayed for debugging
+- Verification is manual and user-controlled (no auto-verification)
+- Users should review the code snippet before verifying
+- Failed submissions show stderr output for troubleshooting

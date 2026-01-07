@@ -1,8 +1,9 @@
 import express from 'express';
 import { randomUUID } from 'node:crypto';
 import cors from 'cors';
-import type { SelectionPayload, ComponentContext } from '../src/shared/types';
+import type { SelectionPayload, ComponentContext, SubmissionRequest, SubmissionResponse } from '../src/shared/types';
 import { resolveSelection } from './resolvers';
+import { submitToAgent as executeCursorAgent } from './resolvers/agentSubmitter';
 
 const app = express();
 
@@ -48,6 +49,43 @@ app.post('/resolve-selection', async (req, res) => {
   }
 
   res.json({ componentContext });
+});
+
+app.post('/submit-to-agent', async (req, res) => {
+  const request: SubmissionRequest = req.body;
+  
+  // Validate request
+  if (!request.componentContext || !request.userMessage) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing componentContext or userMessage',
+    });
+    return;
+  }
+
+  // Only allow verified contexts
+  if (!request.componentContext.verified) {
+    res.status(400).json({
+      success: false,
+      message: 'Component context must be verified before submission',
+    });
+    return;
+  }
+
+  try {
+    const result = await executeCursorAgent(
+      request.componentContext,
+      request.userMessage,
+      process.cwd()
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('[ui-agent] Agent submission error:', error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Internal server error',
+    });
+  }
 });
 
 const port = process.env.PORT ?? 4000;

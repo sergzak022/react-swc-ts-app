@@ -32,6 +32,12 @@ export interface TestCase {
   /** Expected confidence level from resolver */
   expectedConfidence: 'high' | 'medium' | 'low';
   
+  /** Expected resolution mechanism (heuristic or agent) */
+  expectedSource?: 'heuristic' | 'agent';
+  
+  /** If true, source mismatch is treated as an error instead of warning */
+  strictSourceCheck?: boolean;
+  
   /** Tags for filtering and categorization */
   tags: string[];
   
@@ -598,6 +604,20 @@ export const TEST_CASES: TestCase[] = [
     expectedConfidence: 'low',
     tags: ['edge', 'hidden', 'visibility'],
     priority: 'p3'
+  },
+  
+  {
+    id: 'infrastructure-01',
+    category: 'edge',
+    name: 'Test infrastructure exclusion',
+    description: 'Element with both data-testid and data-test-case-id - selector must only use data-testid',
+    expectedSelector: '[data-testid="test-button"]',
+    expectedFile: null,
+    expectedConfidence: 'high',
+    expectedSource: 'heuristic',
+    strictSourceCheck: true,
+    tags: ['infrastructure', 'validation', 'critical'],
+    priority: 'p0'
   },
   
   // ========================================================================

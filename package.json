@@ -11,7 +11,8 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "e2e": "npm run build -- -m development && npm run preview -- --port 5175 & BASE_URL=http://localhost:5175 npx playwright test",
-    "dev:server": "tsx watch server/index.ts"
+    "dev:server": "tsx watch server/index.ts",
+    "start:dev": "concurrently \"npm run dev:server\" \"npm run start\" --names \"server,vite\" --prefix-colors \"blue,green\""
   },
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
@@ -44,6 +45,7 @@
     "@vitejs/plugin-react-swc": "^3.0.0",
     "autoprefixer": "^10.4.22",
     "babel-jest": "^29.5.0",
+    "concurrently": "^9.2.1",
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.4",

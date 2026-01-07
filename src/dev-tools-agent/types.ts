@@ -3,7 +3,7 @@
  */
 
 // Re-export shared types
-export type { SelectionPayload, ComponentContext, TestIdInfo } from '../shared/types';
+export type { SelectionPayload, ComponentContext, TestIdInfo, SubmissionRequest, SubmissionResponse } from '../shared/types';
 
 // Overlay-specific types (stay here)
 export interface HighlightRect {

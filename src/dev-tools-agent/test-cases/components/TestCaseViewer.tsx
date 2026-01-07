@@ -1,4 +1,7 @@
+import { useMemo, useState } from 'react';
 import type { TestCase } from '../TestCaseRegistry';
+import { useTestResults } from '../TestResultContext';
+import type { TestStatus } from '../types';
 
 interface TestCaseViewerProps {
   testCase: TestCase;
@@ -27,15 +30,42 @@ function getConfidenceBadgeColor(confidence: 'high' | 'medium' | 'low'): string 
   }
 }
 
+function getStatusBadgeColor(status: TestStatus): string {
+  switch (status) {
+    case 'passed': return 'bg-green-600 text-white';
+    case 'failed': return 'bg-red-600 text-white';
+    case 'running': return 'bg-blue-600 text-white animate-pulse';
+    case 'pending': return 'bg-gray-400 text-white';
+  }
+}
+
+function formatDuration(ms?: number): string {
+  if (!ms) return '-';
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
 export function TestCaseViewer({ testCase, children }: TestCaseViewerProps) {
+  const { results, resultsVersion, runSingleTest, isRunning } = useTestResults();
+  const result = useMemo(() => results.get(testCase.id), [results, resultsVersion, testCase.id]);
+  const [showDetails, setShowDetails] = useState(false);
+  
   const borderColor = getBorderColor(testCase.expectedConfidence);
   const badgeColor = getConfidenceBadgeColor(testCase.expectedConfidence);
   
   return (
-    <div className={`relative border-2 rounded-lg p-4 m-4 ${borderColor}`}>
-      {/* Test Case ID Badge */}
-      <div className="absolute top-2 right-2 bg-gray-800 text-white px-2 py-1 rounded text-xs font-mono">
-        {testCase.id}
+    <div className={`relative border-2 rounded-lg p-4 m-4 ${borderColor}`} data-test-case-viewer-id={testCase.id}>
+      {/* Test Case ID Badge and Status Badge */}
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        {result && (
+          <div className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(result.status)}`}>
+            {result.status.toUpperCase()}
+            {result.duration && ` (${formatDuration(result.duration)})`}
+          </div>
+        )}
+        <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs font-mono">
+          {testCase.id}
+        </div>
       </div>
       
       {/* Category Label */}
@@ -79,6 +109,114 @@ export function TestCaseViewer({ testCase, children }: TestCaseViewerProps) {
         </div>
       </div>
       
+      {/* Test Results Section */}
+      {result && (
+        <div className="mb-3 mt-3 border-t pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+              {showDetails ? 'Hide' : 'Show'} Details
+            </button>
+            {!isRunning(testCase.id) && (
+              <button
+                onClick={() => runSingleTest(testCase)}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Run Test
+              </button>
+            )}
+          </div>
+          
+          {showDetails && (
+            <div className="bg-white p-3 rounded border space-y-2 text-sm">
+              {/* Expected vs Actual Comparison */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Expected Selector</div>
+                  <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
+                    {testCase.expectedSelector ?? 'null'}
+                  </code>
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Actual Selector</div>
+                  <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
+                    {result.actualSelector ?? 'null'}
+                  </code>
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Expected File</div>
+                  <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
+                    {testCase.expectedFile ?? 'null'}
+                  </code>
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Actual File</div>
+                  <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
+                    {result.actualFile ?? 'null'}
+                  </code>
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Expected Confidence</div>
+                  <span className={`text-xs px-2 py-1 rounded inline-block ${badgeColor}`}>
+                    {testCase.expectedConfidence}
+                  </span>
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Actual Confidence</div>
+                  <span className={`text-xs px-2 py-1 rounded inline-block ${getConfidenceBadgeColor(result.actualConfidence || 'low')}`}>
+                    {result.actualConfidence ?? 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Resolution Mechanism */}
+              {result.actualSource && (
+                <div>
+                  <div className="font-semibold text-xs text-gray-600 mb-1">Resolution Mechanism</div>
+                  <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+                    {result.actualSource}
+                  </span>
+                </div>
+              )}
+
+              {/* Errors */}
+              {result.errors.length > 0 && (
+                <div>
+                  <div className="font-semibold text-xs text-red-600 mb-1">Errors</div>
+                  <ul className="list-disc list-inside text-xs text-red-700 space-y-1">
+                    {result.errors.map((error, idx) => (
+                      <li key={idx}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Warnings */}
+              {result.warnings.length > 0 && (
+                <div>
+                  <div className="font-semibold text-xs text-yellow-600 mb-1">Warnings</div>
+                  <ul className="list-disc list-inside text-xs text-yellow-700 space-y-1">
+                    {result.warnings.map((warning, idx) => (
+                      <li key={idx}>{warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Failure Reason */}
+              {result.failureReason && (
+                <div>
+                  <div className="font-semibold text-xs text-red-600 mb-1">Failure Reason</div>
+                  <div className="text-xs text-red-700">{result.failureReason}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Test Element */}
       <div 
         className={`

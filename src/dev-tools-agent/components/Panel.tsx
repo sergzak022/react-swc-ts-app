@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { SelectionPayload, ComponentContext } from '../types';
+import type { SelectionPayload, ComponentContext, SubmissionResponse } from '../types';
+import { submitToAgent } from '../api';
 
 interface PanelProps {
   payload: SelectionPayload | null;
@@ -31,6 +32,10 @@ export function Panel({ payload, componentContext, onClose }: PanelProps) {
   const dragOffsetRef = useRef<Position>({ x: 0, y: 0 });
   const resizeStartRef = useRef<{ x: number; width: number; positionX: number }>({ x: 0, width: 0, positionX: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [userMessage, setUserMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<SubmissionResponse | null>(null);
 
   /**
    * Constrain position to viewport bounds.
@@ -138,6 +143,47 @@ export function Panel({ payload, componentContext, onClose }: PanelProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [constrainToViewport, constrainWidth]);
+
+  // Sync verification state with componentContext
+  useEffect(() => {
+    if (componentContext) {
+      setIsVerified(componentContext.verified);
+      setUserMessage('');
+      setSubmissionResult(null);
+    }
+  }, [componentContext]);
+
+  // Handle verify button click
+  const handleVerify = useCallback(() => {
+    setIsVerified(true);
+  }, []);
+
+  // Handle submit button click
+  const handleSubmit = useCallback(async () => {
+    if (!componentContext || !isVerified || !userMessage.trim()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionResult(null);
+
+    try {
+      const result = await submitToAgent(
+        { ...componentContext, verified: isVerified },
+        userMessage.trim()
+      );
+      setSubmissionResult(result);
+      console.log('[UI-Agent] Submission result:', result);
+    } catch (error) {
+      console.error('[UI-Agent] Submission failed:', error);
+      setSubmissionResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Submission failed',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [componentContext, isVerified, userMessage]);
 
   return (
     <div
@@ -251,6 +297,91 @@ export function Panel({ payload, componentContext, onClose }: PanelProps) {
                 </pre>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Action Section */}
+        {componentContext && (
+          <div className="mb-3 space-y-3">
+            {/* Verify Button */}
+            {!isVerified && (
+              <div className="p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-md">
+                <div className="text-xs text-yellow-200 mb-2">
+                  ⚠️ This component mapping needs verification before submission.
+                </div>
+                <button
+                  onClick={handleVerify}
+                  className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors"
+                >
+                  ✓ Verify This Mapping
+                </button>
+              </div>
+            )}
+
+            {/* Message Input */}
+            {isVerified && (
+              <div className="space-y-2">
+                <label className="text-xs text-gray-400 font-medium block">
+                  What would you like to change?
+                </label>
+                <textarea
+                  value={userMessage}
+                  onChange={(e) => setUserMessage(e.target.value)}
+                  placeholder="Describe the change you want to make..."
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 placeholder-gray-500 resize-y min-h-[80px] focus:outline-none focus:border-blue-500"
+                  disabled={isSubmitting}
+                />
+                
+                {/* Submit Button */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={!userMessage.trim() || isSubmitting}
+                  className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="inline-block animate-spin">⏳</span>
+                      Submitting to Cursor Agent...
+                    </>
+                  ) : (
+                    <>🚀 Submit to Cursor Agent</>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Submission Result */}
+            {submissionResult && (
+              <div
+                className={`p-3 rounded-md border ${
+                  submissionResult.success
+                    ? 'bg-green-900/30 border-green-700/50'
+                    : 'bg-red-900/30 border-red-700/50'
+                }`}
+              >
+                <div
+                  className={`text-sm font-medium mb-1 ${
+                    submissionResult.success ? 'text-green-200' : 'text-red-200'
+                  }`}
+                >
+                  {submissionResult.success ? '✓ Success' : '✗ Failed'}
+                </div>
+                <div className="text-xs text-gray-300">{submissionResult.message}</div>
+                {submissionResult.agentOutput && (
+                  <details className="mt-2 group">
+                    <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-300 list-none flex items-center gap-1">
+                      <span className="text-[10px] group-open:rotate-90 transition-transform">
+                        ▶
+                      </span>
+                      Agent Output
+                    </summary>
+                    <pre className="mt-1 p-2 bg-gray-900 rounded text-xs text-gray-300 overflow-auto max-h-32 whitespace-pre-wrap">
+                      {submissionResult.agentOutput}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
           </div>
         )}
 

@@ -1,4 +1,7 @@
 import { AgentFallbackProvider } from './AgentFallbackContext';
+import { TestResultProvider } from './TestResultContext';
+import { TestErrorBoundary } from './components/TestErrorBoundary';
+import { TestControls } from './components/TestControls';
 import { AgentFallbackToggle } from './components/AgentFallbackToggle';
 import { TestIdVariations } from './components/TestIdVariations';
 import { CssSelectorScenarios } from './components/CssSelectorScenarios';
@@ -9,7 +12,11 @@ import { ComponentPatterns } from './components/ComponentPatterns';
 export function TestCasesPage() {
   return (
     <AgentFallbackProvider>
-      <TestCasesPageContent />
+      <TestResultProvider>
+        <TestErrorBoundary>
+          <TestCasesPageContent />
+        </TestErrorBoundary>
+      </TestResultProvider>
     </AgentFallbackProvider>
   );
 }
@@ -27,6 +34,9 @@ function TestCasesPageContent() {
       
       {/* Agent Fallback Toggle */}
       <AgentFallbackToggle />
+      
+      {/* Test Controls */}
+      <TestControls />
       
       {/* Navigation */}
       <nav className="mb-6 flex gap-4 flex-wrap">

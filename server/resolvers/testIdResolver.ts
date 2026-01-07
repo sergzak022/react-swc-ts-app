@@ -82,20 +82,31 @@ async function searchDirectTestId(testId: string, cwd: string): Promise<FileMatc
 
 /**
  * Find the constant name that holds a given string value.
- * Looks for patterns like: const SOME_ID = 'value' or export const SOME_ID = "value"
+ * Looks for patterns like: 
+ * - const SOME_ID = 'value' or export const SOME_ID = "value"
+ * - PROPERTY: "value" (inside object literals like const TestIds = { PROPERTY: "value" })
  */
 async function findConstantName(testId: string, cwd: string): Promise<string | null> {
   const escaped = escapeRegex(testId);
-  const pattern = new RegExp(`(\\w+)\\s*=\\s*['"]${escaped}['"]`);
+  // Pattern 1: Standalone constant: const NAME = "value"
+  const standalonePattern = new RegExp(`(\\w+)\\s*=\\s*['"]${escaped}['"]`);
+  // Pattern 2: Object property: NAME: "value" or NAME: 'value'
+  const objectPropertyPattern = new RegExp(`(\\w+)\\s*:\\s*['"]${escaped}['"]`);
 
   const files = await getSourceFiles(cwd);
 
   for (const file of files) {
     try {
       const content = await readFile(join(cwd, file), 'utf-8');
-      const match = content.match(pattern);
-      if (match && match[1]) {
-        return match[1];
+      // Try standalone constant first
+      const standaloneMatch = content.match(standalonePattern);
+      if (standaloneMatch && standaloneMatch[1]) {
+        return standaloneMatch[1];
+      }
+      // Try object property pattern
+      const objectMatch = content.match(objectPropertyPattern);
+      if (objectMatch && objectMatch[1]) {
+        return objectMatch[1];
       }
     } catch {
       // Skip files that can't be read
